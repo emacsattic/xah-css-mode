@@ -236,11 +236,16 @@ WARNING: not robust."
 (setq xcm-property-names
 '(
 "background"
+
+"background-attachment"
+"background-clip"
 "background-color"
 "background-image"
+"background-origin"
 "background-position"
-"background-size"
 "background-repeat"
+"background-size"
+
 "border"
 "border-bottom"
 "border-color"
