@@ -900,7 +900,6 @@ This is called by emacs abbrev system."
   (define-key xcm-keymap (kbd "TAB") 'xcm-complete-or-indent)
 
   (define-prefix-command 'xcm-single-keys-keymap)
-  (define-key xcm-keymap (kbd "<menu> e") xcm-single-keys-keymap)
 
   (define-key xcm-single-keys-keymap (kbd "r") 'xcm-insert-random-color-hsl)
   (define-key xcm-single-keys-keymap (kbd "c") 'xcm-hex-color-to-hsl)
@@ -928,6 +927,12 @@ CSS keywords are colored. Basically that's it.
 
   (set-syntax-table xcm-syntax-table)
   (setq font-lock-defaults '((xcm-font-lock-keywords)))
+
+  (if (or
+       (not (boundp 'xfk-major-mode-lead-key))
+       (null 'xfk-major-mode-lead-key))
+      (define-key xcm-keymap (kbd "<menu> e") xcm-single-keys-keymap)
+    (define-key xcm-keymap xfk-major-mode-lead-key xcm-single-keys-keymap))
   (use-local-map xcm-keymap)
 
   (setq local-abbrev-table xcm-abbrev-table)
