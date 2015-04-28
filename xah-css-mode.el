@@ -20,7 +20,7 @@
 ;; version 0.2, 2013-04-22 added xcm-compact-css-region
 ;; version 0.1, 2013-04-18 first version
 
-(require 'xfrp_find_replace_pairs)
+(require 'xah-replace-pairs)
 ;(require 'xeu_elisp_util)
 (require 'color) ; part of emacs 24.3
 
@@ -98,7 +98,7 @@ WARNING: not robust."
   (save-restriction
     (narrow-to-region p1 p2)
     (replace-regexp-pairs-region (point-min) (point-max) '(["  +" " "]))
-    (replace-pairs-region (point-min) (point-max)
+    (xah-replace-pairs-region (point-min) (point-max)
                           '(
                             ["\n" ""]
                             [" /* " "/*"]
