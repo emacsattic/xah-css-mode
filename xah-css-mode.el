@@ -1,16 +1,43 @@
-;;; xah-css-mode.el --- Major mode for editing CSS code. -*- coding: utf-8 -*-
+;;; xah-css-mode.el --- Major mode for editing CSS code.
 
-;; Copyright © 2013 by Xah Lee
+;; Copyright © 2013-2015 by Xah Lee
 
-;; Author: Xah Lee <xah@xahlee.org> ( http://xahlee.org/ )
-;; Created: 2013-04-18
-;; Keywords: languages, convenience
+;; Author: Xah Lee ( http://xahlee.org/ )
+;; Version: 1.0.0
+;; Created: 18 April 2013
+;; Keywords: languages, convenience, css, color
+;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
 
-;; You can redistribute this program and/or modify it. Please give credit and link. Thanks.
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 2.
 
 ;;; Commentary:
-;; Major mode for editing CSS code.
-;; home page http://ergoemacs.org/emacs/xah-css-mode.html
+
+;; Major mode for editing CSS code. Alternative to GNU emacs's builtin `css-mode'.
+
+;; • Syntax coloring of CSS words only. This means, if you have a typo such as {widt:65%}, you'll know because it won't be colored. If a piece of text is not colored, it's not a valid CSS word.
+
+;; • Keyword completion, with ido interface. Press TAB to complete. All CSS words are supported: {html5 tags, property names, value keywords, units, colors, pseudo selectors words, “at keywords”, …}. 
+
+;; • Coloring of HEX #rrggbb format #aabbcc and HSL Color format hsl(0,68%,42%).
+
+;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format to HSL Color format.
+
+;; • Call `xah-css-compact-css-region' to “minimize” region.
+
+;; • Call `describe-function' on `xah-css-mode' for detail.
+
+;;; INSTALL:
+
+;; manual install.
+
+;; Place the file at ~/.emacs.d/lisp/
+;; Then put the following in ~/.emacs.d/init.el
+;; (add-to-list 'load-path "~/.emacs.d/lisp/")
+;; (autoload 'xah-css-mode "xah-css-mode" "css major mode." t)
 
 ;;; HISTORY
 
@@ -20,9 +47,13 @@
 ;; version 0.2, 2013-04-22 added xah-css-compact-css-region
 ;; version 0.1, 2013-04-18 first version
 
+
+;;; Code:
+
 (require 'xah-replace-pairs)
 ;(require 'xeu_elisp_util)
 (require 'color) ; part of emacs 24.3
+(require 'newcomment) ; part of emacs
 
 (defvar xah-css-mode-hook nil "Standard hook for `xah-css-mode'")
 
@@ -30,35 +61,36 @@
 
 (defun xah-css-insert-random-color-hsl ()
   "Insert a random color string of CSS HSL format.
-Example output: hsl(100,24%,82%);"
+Sample output: hsl(100,24%,82%);
+URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
+Version 2015-06-11"
   (interactive)
-  (insert (format "hsl(%d,%d%%,%d%%);" (random 360) (random 100) (random 100))) )
+  (insert (format "hsl(%d,%d%%,%d%%);" (random 360) (random 100) (random 100))))
 
 (defun xah-css-hex-color-to-hsl ()
   "Convert color spec under cursor from “#rrggbb” to CSS HSL format.
  ⁖ #ffefd5 ⇒ hsl(37,100%,91%)
-"
+URL `http://ergoemacs.org/emacs/elisp_convert_rgb_hsl_color.html'
+Version 2015-06-11"
   (interactive)
   (let* (
          (bds (bounds-of-thing-at-point 'word))
          (p1 (car bds))
          (p2 (cdr bds))
          (currentWord (buffer-substring-no-properties p1 p2)))
-
     (if (string-match "[a-fA-F0-9]\\{6\\}" currentWord)
         (progn
           (delete-region p1 p2 )
           (if (looking-back "#") (delete-char -1))
           (insert (xah-css-hex-to-hsl-color currentWord )))
       (progn
-        (error "The current word 「%s」 is not of the form #rrggbb." currentWord)))))
+        (user-error "The current word 「%s」 is not of the form #rrggbb." currentWord)))))
 
 (defun xah-css-hex-to-hsl-color (φhex-str)
   "Convert φhex-str color to CSS HSL format.
-Return a string.
- ⁖
-  \"#ffefd5\" ⇒ \"hsl(37,100%,91%)\"
-"
+Return a string. ⁖  \"#ffefd5\" ⇒ \"hsl(37,100%,91%)\"
+URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
+Version 2015-06-11"
   (let* (
          (colorVec (xah-css-convert-color-hex-to-vec φhex-str))
          (xR (elt colorVec 0))
@@ -75,17 +107,20 @@ Return a string.
 Example:
  (xah-css-convert-color-hex-to-vec \"00ffcc\") ⇒ [0.0 1.0 0.8]
 
-Note: The input string must NOT start with “#”. If so, the return value is nil."
+Note: The input string must NOT start with “#”. If so, the return value is nil.
+URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
+Version 2015-06-11"
   (vector
    (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 0 2) 16) 255)
    (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 2 4) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 4) 16) 255)
-   ))
+   (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 4) 16) 255)))
 
 (defun xah-css-normalize-number-scale (φval φrange-max)
   "scale φval from range [0, φrange-max] to [0, 1]
 The arguments can be int or float.
-Return value is float."
+Return value is float.
+URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
+Version 2015-06-11"
   (/ (float φval) (float φrange-max)))
 
 
@@ -119,7 +154,7 @@ Version 2015-04-29"
        ))))
 
 
-(defvar xah-css-html-tag-names nil "a list of HTML5 tag names.")
+(defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
 (setq xah-css-html-tag-names
 '("a"
 "abbr"
@@ -233,7 +268,7 @@ Version 2015-04-29"
 "wbr")
  )
 
-(defvar xah-css-property-names nil "a list of CSS property names.")
+(defvar xah-css-property-names nil "List of CSS property names.")
 (setq xah-css-property-names
 '(
 
@@ -386,7 +421,7 @@ Version 2015-04-29"
 
 ) )
 
-(defvar xah-css-pseudo-selector-names nil "a list of CSS pseudo selector names.")
+(defvar xah-css-pseudo-selector-names nil "List of CSS pseudo selector names.")
 (setq xah-css-pseudo-selector-names '(
 "::after"
 "::before"
@@ -443,7 +478,7 @@ Version 2015-04-29"
 
 ) )
 
-(defvar xah-css-media-keywords nil "a list of CSS xxxxx todo.")
+(defvar xah-css-media-keywords nil "List of CSS xxxxx todo.")
 (setq xah-css-media-keywords '(
 "@charset"
 "@document"
@@ -461,7 +496,7 @@ Version 2015-04-29"
 "speech"
 ) ) ; todo
 
-(defvar xah-css-unit-names nil "a list of CSS unite names.")
+(defvar xah-css-unit-names nil "List of CSS unite names.")
 (setq xah-css-unit-names '("px"
 "pt"
 "pc"
@@ -473,7 +508,7 @@ Version 2015-04-29"
 "ex"
 "%") )
 
-(defvar xah-css-value-kwds nil "a list of CSS value names")
+(defvar xah-css-value-kwds nil "List of CSS value names")
 (setq xah-css-value-kwds
 '(
 
@@ -560,7 +595,7 @@ Version 2015-04-29"
 
 ) )
 
-(defvar xah-css-color-names nil "a list of CSS color names.")
+(defvar xah-css-color-names nil "List of CSS color names.")
 (setq xah-css-color-names
 '("aliceblue"
 "antiquewhite"
@@ -711,7 +746,7 @@ Version 2015-04-29"
 "yellowgreen")
  )
 
-(defvar xah-css-all-keywords nil "list of all elisp keywords")
+(defvar xah-css-all-keywords nil "List of all elisp keywords")
 (setq xah-css-all-keywords (append xah-css-html-tag-names
                                      xah-css-color-names
                                      xah-css-property-names
@@ -741,9 +776,7 @@ This uses `ido-mode' user interface for completion."
     (setq ξresult-sym
           (ido-completing-read "" xah-css-all-keywords nil nil ξcurrent-sym ))
     (delete-region ξp1 ξp2)
-    (insert ξresult-sym)
-
-    ))
+    (insert ξresult-sym)))
 
 
 ;; syntax table
@@ -900,11 +933,11 @@ This is called by emacs abbrev system."
 (when (string-equal system-type "windows-nt")
   (define-key key-translation-map (kbd "<apps>") (kbd "<menu>")))
 
-(defvar xah-css-keymap nil "Keybinding for `xah-css-mode'")
+(defvar xah-css-key-map nil "Keybinding for `xah-css-mode'")
 
 (progn
-  (setq xah-css-keymap (make-sparse-keymap))
-  (define-key xah-css-keymap (kbd "TAB") 'xah-css-complete-or-indent)
+  (setq xah-css-key-map (make-sparse-keymap))
+  (define-key xah-css-key-map (kbd "TAB") 'xah-css-complete-or-indent)
 
   (define-prefix-command 'xah-css-single-keys-keymap)
 
@@ -914,18 +947,20 @@ This is called by emacs abbrev system."
   (define-key xah-css-single-keys-keymap (kbd "u") 'xah-css-complete-symbol)
   (define-key xah-css-single-keys-keymap (kbd "i") 'xah-css-indent-line)
 
-  ;  (define-key xah-css-keymap [remap comment-dwim] 'xah-css-comment-dwim)
+  ;  (define-key xah-css-key-map [remap comment-dwim] 'xah-css-comment-dwim)
   )
 
 
 
-;; define the mode
+;;;###autoload
 (defun xah-css-mode ()
   "A major mode for CSS.
 
 CSS keywords are colored. Basically that's it.
 
-\\{xah-css-keymap}"
+URL `http://ergoemacs.org/emacs/xah-css-mode.html'
+
+\\{xah-css-key-map}"
   (interactive)
   (kill-all-local-variables)
 
@@ -938,9 +973,9 @@ CSS keywords are colored. Basically that's it.
   (if (or
        (not (boundp 'xfk-major-mode-lead-key))
        (null 'xfk-major-mode-lead-key))
-      (define-key xah-css-keymap (kbd "<menu> e") xah-css-single-keys-keymap)
-    (define-key xah-css-keymap xfk-major-mode-lead-key xah-css-single-keys-keymap))
-  (use-local-map xah-css-keymap)
+      (define-key xah-css-key-map (kbd "<menu> e") xah-css-single-keys-keymap)
+    (define-key xah-css-key-map xfk-major-mode-lead-key xah-css-single-keys-keymap))
+  (use-local-map xah-css-key-map)
 
   (setq local-abbrev-table xah-css-abbrev-table)
   (setq-local comment-start "/*")
@@ -950,9 +985,11 @@ CSS keywords are colored. Basically that's it.
 
   (run-mode-hooks 'xah-css-mode-hook))
 
-;; (when (featurep 'auto-complete )
-;;   (add-to-list 'ac-modes 'xah-css-mode)
-;;   (add-hook 'xah-css-mode-hook 'ac-css-mode-setup))
-
 (provide 'xah-css-mode)
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+;;; xah-css-mode.el ends here
 
