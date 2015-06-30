@@ -18,15 +18,15 @@
 
 ;; Major mode for editing CSS code. Alternative to GNU emacs's builtin `css-mode'.
 
-;; • Syntax coloring of CSS words only. So if you have a typo, it won't be colored. If a piece of text is not colored, it's not a valid CSS word.
+;; • Syntax coloring of CSS keyword only, not by syntax form. This means, if you have a typo, you'll know because it won't be colored.
 
-;; • Keyword completion, with ido interface. Press TAB to complete. All CSS words are supported: {html5 tags, property names, value keywords, units, colors, pseudo selectors words, “at keywords”, …}. 
+;; • Keyword completion, with ido-mode interface. Press Tab ↹ to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
 
 ;; • Syntax coloring of hexadecimal color format #rrggbb and HSL Color format hsl(0,68%,42%).
 
-;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format to HSL Color format.
+;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
 
-;; • Call `xah-css-compact-css-region' to “minimize” region.
+;; • Call `xah-css-compact-css-region' to compact region.
 
 ;; • Call `describe-function' on `xah-css-mode' for detail.
 
@@ -34,7 +34,7 @@
 
 ;; manual install.
 
-;; Place the file at ~/.emacs.d/lisp/
+;; Place the file at ~/.emacs.d/lisp/ . Create the dir if it doesn't exist.
 ;; Then put the following in ~/.emacs.d/init.el
 ;; (add-to-list 'load-path "~/.emacs.d/lisp/")
 ;; (autoload 'xah-css-mode "xah-css-mode" "css major mode." t)
@@ -142,7 +142,7 @@ Version 2015-04-29"
      (point-min)
      (point-max)
      '(
-       ["\n" ""]
+       ["\n" " "]
        [" /* " "/*"]
        [" */ " "*/"]
        [" {" "{"]
@@ -152,6 +152,33 @@ Version 2015-04-29"
        [";}" "}"]
        ["}" "}\n"]
        ))))
+
+(defun xah-css-compact-block ()
+  "Compact current CSS code block.
+A block is surrounded by blank lines.
+This command basically replace newline char by space.
+Version 2015-06-29"
+  (interactive)
+  (let (p1 p2)
+    (save-excursion
+      (if (re-search-backward "\n[ \t]*\n" nil "move")
+          (progn (re-search-forward "\n[ \t]*\n")
+                 (setq p1 (point)))
+        (setq p1 (point)))
+      (if (re-search-forward "\n[ \t]*\n" nil "move")
+          (progn (re-search-backward "\n[ \t]*\n")
+                 (setq p2 (point)))
+        (setq p2 (point))))
+    (save-restriction
+      (narrow-to-region p1 p2)
+
+      (goto-char (point-min))
+      (while (search-forward "\n" nil "NOERROR")
+        (replace-match " "))
+
+      (goto-char (point-min))
+      (while (search-forward-regexp "  +" nil "NOERROR")
+        (replace-match " ")))))
 
 
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
@@ -564,7 +591,7 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (interactive)
   (kill-all-local-variables)
 
-  (setq mode-name "∑CSS")
+  (setq mode-name "ξCSS")
   (setq major-mode 'xah-css-mode)
 
   (set-syntax-table xah-css-syntax-table)
