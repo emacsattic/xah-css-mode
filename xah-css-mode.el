@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -323,7 +323,7 @@ Version 2015-06-29"
 
 (defvar xah-css-unit-names nil "List of CSS unite names.")
 (setq xah-css-unit-names
- '("px" "pt" "pc" "cm" "mm" "in" "em" "rem" "ex" "%") )
+ '("px" "pt" "pc" "cm" "mm" "in" "em" "rem" "ex" "%" "deg") )
 
 (defvar xah-css-value-kwds nil "List of CSS value names")
 (setq
@@ -340,6 +340,9 @@ Version 2015-06-29"
    "smaller" "solid" "square" "static" "steps" "thin" "top" "translate"
    "translate3d" "translateX" "translateY" "translateZ" "transparent"
    "underline" "url" "wrap" "x-large" "xx-large"
+
+"linear-gradient"
+"radial-gradient"
    ) )
 
 (defvar xah-css-color-names nil "List of CSS color names.")
@@ -435,12 +438,12 @@ This uses `ido-mode' user interface for completion."
 ;; syntax coloring related
 
 (setq xah-css-font-lock-keywords
-      (let (
+      (let ( 
           (htmlTagNames (regexp-opt xah-css-html-tag-names 'words) )
           (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ) )
           (cssValueNames (regexp-opt xah-css-value-kwds 'symbols) )
           (cssColorNames (regexp-opt xah-css-color-names 'symbols) )
-          (cssUnitNames (regexp-opt xah-css-unit-names 'symbols ) )
+          (cssUnitNames (regexp-opt xah-css-unit-names ) )
           (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ) )
           (cssMedia (regexp-opt xah-css-media-keywords ) )
           )
@@ -613,6 +616,10 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (run-mode-hooks 'xah-css-mode-hook))
 
 (provide 'xah-css-mode)
+
+;;; xah notes to self
+;; Visual Dictionary of CSS
+;; http://xahlee.info/js/css_index.html
 
 ;; Local Variables:
 ;; coding: utf-8
