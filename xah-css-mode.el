@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.0.2
+;; Version: 1.1.2
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -248,17 +248,9 @@ Version 2015-06-29"
 
 (defvar xah-css-pseudo-selector-names nil "List of CSS pseudo selector names.")
 (setq xah-css-pseudo-selector-names '(
-"::after"
-"::before"
-"::choices"
-"::first-letter"
-"::first-line"
-"::repeat-index"
-"::repeat-item"
-"::selection"
-"::value"
 ":active"
 ":after"
+":any"
 ":before"
 ":checked"
 ":default"
@@ -300,7 +292,6 @@ Version 2015-06-29"
 ":target"
 ":valid"
 ":visited"
-
 ) )
 
 (defvar xah-css-media-keywords nil "List of CSS xxxxx todo.")
@@ -439,44 +430,45 @@ This uses `ido-mode' user interface for completion."
 
 (setq xah-css-font-lock-keywords
       (let ( 
-          (htmlTagNames (regexp-opt xah-css-html-tag-names 'words) )
-          (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ) )
-          (cssValueNames (regexp-opt xah-css-value-kwds 'symbols) )
-          (cssColorNames (regexp-opt xah-css-color-names 'symbols) )
-          (cssUnitNames (regexp-opt xah-css-unit-names ) )
-          (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ) )
-          (cssMedia (regexp-opt xah-css-media-keywords ) )
-          )
+            (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ))
+            (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
+            (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
+            (cssColorNames (regexp-opt xah-css-color-names 'symbols))
+            (cssUnitNames (regexp-opt xah-css-unit-names t ))
+            (cssMedia (regexp-opt xah-css-media-keywords ))
+            (htmlTagNames (regexp-opt xah-css-html-tag-names 'symbols))
+)
         `(
-          (,cssPropertieNames . font-lock-type-face)
+          ("#[a-zA-z]+[0-9]*" . font-lock-defaults)
+          (,cssPseudoSelectorNames . font-lock-preprocessor-face)
+          (,htmlTagNames . font-lock-function-name-face)
+          (,cssPropertieNames . font-lock-variable-name-face )
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-constant-face)
-          (,cssUnitNames . font-lock-builtin-face)
-          (,cssPseudoSelectorNames . font-lock-preprocessor-face)
-          (,cssMedia . font-lock-reference-face)
-          (,htmlTagNames . font-lock-function-name-face)
+          (,cssUnitNames . (1 font-lock-type-face) )
+          (,cssMedia . font-lock-builtin-face)
 
-("#[abcdef[:digit:]]\\{6\\}" .
-      (0 (put-text-property
-          (match-beginning 0)
-          (match-end 0)
-          'face (list :background (match-string-no-properties 0)))))
+          ("#[abcdef[:digit:]]\\{6\\}" .
+           (0 (put-text-property
+               (match-beginning 0)
+               (match-end 0)
+               'face (list :background (match-string-no-properties 0)))))
 
-("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
-     (0 (put-text-property
-         (+ (match-beginning 0) 3)
-         (match-end 0)
-         'face (list :background
- (concat "#" (mapconcat 'identity
-                        (mapcar
-                         (lambda (x) (format "%02x" (round (* x 255))))
-                         (color-hsl-to-rgb
-                          (/ (string-to-number (match-string-no-properties 1)) 360.0)
-                          (/ (string-to-number (match-string-no-properties 2)) 100.0)
-                          (/ (string-to-number (match-string-no-properties 3)) 100.0)
-                          ) )
-                        "" )) ;  "#00aa00"
-                      ))))
+          ("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
+           (0 (put-text-property
+               (+ (match-beginning 0) 3)
+               (match-end 0)
+               'face (list :background
+                           (concat "#" (mapconcat 'identity
+                                                  (mapcar
+                                                   (lambda (x) (format "%02x" (round (* x 255))))
+                                                   (color-hsl-to-rgb
+                                                    (/ (string-to-number (match-string-no-properties 1)) 360.0)
+                                                    (/ (string-to-number (match-string-no-properties 2)) 100.0)
+                                                    (/ (string-to-number (match-string-no-properties 3)) 100.0)
+                                                    ) )
+                                                  "" )) ;  "#00aa00"
+                           ))))
 
           ("'[^']+'" . font-lock-string-face)
           ) ) )
