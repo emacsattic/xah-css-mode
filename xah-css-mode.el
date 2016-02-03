@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.1.2
+;; Version: 1.2.2
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -18,9 +18,11 @@
 
 ;; Major mode for editing CSS code. Alternative to GNU emacs's builtin `css-mode'.
 
-;; • Syntax coloring of CSS keyword only, not by syntax form. This means, if you have a typo, you'll know because it won't be colored.
+;; Features:
 
-;; • Keyword completion, with ido-mode interface. Press Tab ↹ to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
+;; • All CSS keywords are colored, and only CSS words (including CSS3). For example, the xyz in 「div.xyz {font-size:1.5rem}」, is not colored. This means, if you have a typo, you'll know. And you can easily tell which part of text is CSS, which part came from HTML user defined things, such as class name, id, and values.
+
+;; • Keyword completion, with ido-mode interface. Press Tab key to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
 
 ;; • Syntax coloring of hexadecimal color format #rrggbb and HSL Color format hsl(0,68%,42%).
 
@@ -30,10 +32,13 @@
 
 ;; • Call `describe-function' on `xah-css-mode' for detail.
 
+;; • Indentation is currently not supported by design. In works is function that re-format whole blocks of text, as in golang's gofmt.
+
+;; • This package is self-contained.
+
 ;;; INSTALL:
 
-;; manual install.
-
+;; To manual install,
 ;; Place the file at ~/.emacs.d/lisp/ . Create the dir if it doesn't exist.
 ;; Then put the following in ~/.emacs.d/init.el
 ;; (add-to-list 'load-path "~/.emacs.d/lisp/")
@@ -50,8 +55,6 @@
 
 ;;; Code:
 
-(require 'xah-replace-pairs)
-;(require 'xeu_elisp_util)
 (require 'color) ; part of emacs 24.3
 (require 'newcomment) ; part of emacs
 
@@ -126,6 +129,71 @@ Version 2015-06-11"
 
 ;;; functions
 
+(defun xah-css--replace-regexp-pairs-region (φbegin φend φpairs &optional φfixedcase-p φliteral-p)
+  "Replace regex string find/replace ΦPAIRS in region.
+
+ΦBEGIN ΦEND are the region boundaries.
+
+ΦPAIRS is
+ [[regexStr1 replaceStr1] [regexStr2 replaceStr2] …]
+It can be list or vector, for the elements or the entire argument.
+
+The optional arguments ΦFIXEDCASE-P and ΦLITERAL-P is the same as in `replace-match'.
+
+Find strings case sensitivity depends on `case-fold-search'. You can set it locally, like this: (let ((case-fold-search nil)) …)"
+  (save-restriction
+      (narrow-to-region φbegin φend)
+      (mapc
+       (lambda (ξx)
+         (goto-char (point-min))
+         (while (search-forward-regexp (elt ξx 0) (point-max) t)
+           (replace-match (elt ξx 1) φfixedcase-p φliteral-p)))
+       φpairs)))
+
+(defun xah-css--replace-pairs-region (φbegin φend φpairs)
+  "Replace multiple ΦPAIRS of find/replace strings in region ΦBEGIN ΦEND.
+
+ΦPAIRS is a sequence of pairs
+ [[findStr1 replaceStr1] [findStr2 replaceStr2] …]
+It can be list or vector, for the elements or the entire argument.
+
+Find strings case sensitivity depends on `case-fold-search'. You can set it locally, like this: (let ((case-fold-search nil)) …)
+
+The replacement are literal and case sensitive.
+
+Once a subsring in the buffer is replaced, that part will not change again.  For example, if the buffer content is “abcd”, and the φpairs are a → c and c → d, then, result is “cbdd”, not “dbdd”.
+
+Note: the region's text or any string in ΦPAIRS is assumed to NOT contain any character from Unicode Private Use Area A. That is, U+F0000 to U+FFFFD. And, there are no more than 65534 pairs."
+  (let (
+        (ξunicodePriveUseA #xf0000)
+        (ξi 0)
+        (ξtempMapPoints '()))
+    (progn
+      ;; generate a list of Unicode chars for intermediate replacement. These chars are in  Private Use Area.
+      (setq ξi 0)
+      (while (< ξi (length φpairs))
+        (push (char-to-string (+ ξunicodePriveUseA ξi)) ξtempMapPoints)
+        (setq ξi (1+ ξi))))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region φbegin φend)
+        (progn
+          ;; replace each find string by corresponding item in ξtempMapPoints
+          (setq ξi 0)
+          (while (< ξi (length φpairs))
+            (goto-char (point-min))
+            (while (search-forward (elt (elt φpairs ξi) 0) nil t)
+              (replace-match (elt ξtempMapPoints ξi) t t))
+            (setq ξi (1+ ξi))))
+        (progn
+          ;; replace each ξtempMapPoints by corresponding replacement string
+          (setq ξi 0)
+          (while (< ξi (length φpairs))
+            (goto-char (point-min))
+            (while (search-forward (elt ξtempMapPoints ξi) nil t)
+              (replace-match (elt (elt φpairs ξi) 1) t t))
+            (setq ξi (1+ ξi))))))))
+
 (defun xah-css-compact-css-region (φbegin φend)
   "Remove unnecessary whitespaces of CSS source code in region.
 WARNING: not robust.
@@ -134,11 +202,11 @@ Version 2015-04-29"
   (interactive "r")
   (save-restriction
     (narrow-to-region φbegin φend)
-    (xah-replace-regexp-pairs-region
+    (xah-css--replace-regexp-pairs-region
      (point-min)
      (point-max)
      '(["  +" " "]))
-    (xah-replace-pairs-region
+    (xah-css--replace-pairs-region
      (point-min)
      (point-max)
      '(
@@ -206,43 +274,151 @@ Version 2015-06-29"
 (setq xah-css-property-names
 '(
 
-"align-content" "align-items" "align-self" "animation"
-"animation-delay" "animation-direction" "animation-duration"
-"animation-fill-mode" "animation-iteration-count" "animation-name"
-"animation-play-state" "animation-timing-function" "attr"
-"backface-visibility" "background" "background-attachment"
-"background-clip" "background-color" "background-image"
-"background-origin" "background-position" "background-repeat"
-"background-size" "border" "border-bottom" "border-bottom-color"
-"border-bottom-left-radius" "border-bottom-right-radius"
-"border-bottom-style" "border-bottom-width" "border-collapse"
-"border-color" "border-image" "border-image-outset"
-"border-image-repeat" "border-image-slice" "border-image-source"
-"border-image-width" "border-left" "border-left-color"
-"border-left-style" "border-left-width" "border-radius" "border-right"
-"border-right-color" "border-right-style" "border-right-width"
-"border-spacing" "border-style" "border-top" "border-top-color"
-"border-top-left-radius" "border-top-right-radius" "border-top-style"
-"border-top-width" "border-width" "bottom" "box-decoration-break"
-"box-shadow" "box-sizing" "break-after" "break-before" "break-inside"
-"clear" "color" "content" "counter-increment" "counter-reset" "cursor"
-"direction" "display" "filter" "float" "font" "font-family"
-"font-size" "font-style" "font-weight" "height" "letter-spacing"
-"line-height" "list-style" "list-style-image" "list-style-type"
-"margin" "margin-bottom" "margin-left" "margin-right" "margin-top"
-"max-height" "max-width" "min-height" "min-width" "opacity" "orphans"
-"overflow" "padding" "padding-bottom" "padding-left" "padding-right"
-"padding-top" "page-break-after" "page-break-inside" "position"
-"pre-wrap" "tab-size" "table" "table-cell" "table-layout" "text-align"
-"text-align" "text-align-last" "text-combine-horizontal"
-"text-decoration" "text-decoration" "text-decoration-color"
-"text-decoration-line" "text-decoration-style" "text-indent"
-"text-orientation" "text-overflow" "text-rendering" "text-shadow"
-"text-shadow" "text-transform" "text-underline-position" "top"
-"transform" "transform-origin" "transform-style" "transition"
-"transition-delay" "transition-duration" "transition-property"
-"transition-timing-function" "unicode-bidi" "vertical-align"
-"white-space" "widows" "width" "word-spacing" "word-wrap" "z-index"
+"align-content"
+"align-items"
+"align-self"
+"animation"
+"animation-delay"
+"animation-direction"
+"animation-duration"
+"animation-fill-mode"
+"animation-iteration-count"
+"animation-name"
+"animation-play-state"
+"animation-timing-function"
+"attr"
+"backface-visibility"
+"background"
+"background-attachment"
+"background-clip"
+"background-color"
+"background-image"
+"background-origin"
+"background-position"
+"background-repeat"
+"background-size"
+"border"
+"border-bottom"
+"border-bottom-color"
+"border-bottom-left-radius"
+"border-bottom-right-radius"
+"border-bottom-style"
+"border-bottom-width"
+"border-collapse"
+"border-color"
+"border-image"
+"border-image-outset"
+"border-image-repeat"
+"border-image-slice"
+"border-image-source"
+"border-image-width"
+"border-left"
+"border-left-color"
+"border-left-style"
+"border-left-width"
+"border-radius"
+"border-right"
+"border-right-color"
+"border-right-style"
+"border-right-width"
+"border-spacing"
+"border-style"
+"border-top"
+"border-top-color"
+"border-top-left-radius"
+"border-top-right-radius"
+"border-top-style"
+"border-top-width"
+"border-width"
+"bottom"
+"bottom"
+"box-decoration-break"
+"box-shadow"
+"box-sizing"
+"break-after"
+"break-before"
+"break-inside"
+"clear"
+"color"
+"content"
+"counter-increment"
+"counter-reset"
+"cursor"
+"direction"
+"display"
+"filter"
+"float"
+"font"
+"font-family"
+"font-size"
+"font-style"
+"font-weight"
+"height"
+"left"
+"letter-spacing"
+"line-height"
+"list-style"
+"list-style-image"
+"list-style-type"
+"margin"
+"margin-bottom"
+"margin-left"
+"margin-right"
+"margin-top"
+"max-height"
+"max-width"
+"min-height"
+"min-width"
+"opacity"
+"orphans"
+"overflow"
+"padding"
+"padding-bottom"
+"padding-left"
+"padding-right"
+"padding-top"
+"page-break-after"
+"page-break-inside"
+"position"
+"pre-wrap"
+"right"
+"tab-size"
+"table-layout"
+"text-align"
+"text-align"
+"text-align-last"
+"text-combine-horizontal"
+"text-decoration"
+"text-decoration"
+"text-decoration-color"
+"text-decoration-line"
+"text-decoration-style"
+"text-indent"
+"text-orientation"
+"text-overflow"
+"text-rendering"
+"text-shadow"
+"text-shadow"
+"text-transform"
+"text-underline-position"
+"top"
+"top"
+"transform"
+"transform-origin"
+"transform-style"
+"transition"
+"transition-delay"
+"transition-duration"
+"transition-property"
+"transition-timing-function"
+"unicode-bidi"
+"vertical-align"
+"white-space"
+"widows"
+"width"
+"word-spacing"
+"word-wrap"
+"z-index"
 
 ) )
 
@@ -320,20 +496,97 @@ Version 2015-06-29"
 (setq
  xah-css-value-kwds
  '(
-   "!important" "absolute" "alpha" "auto" "avoid" "block" "bold" "both"
-   "bottom" "break-word" "center" "collapse" "dashed" "dotted" "embed"
-   "fixed" "flex" "flex-start" "flex-wrap" "grid" "help" "hidden" "hsl"
-   "hsla" "inherit" "inline" "inline-block" "italic" "large" "left"
-   "line-through" "ltr" "middle" "monospace" "no-repeat" "none" "normal"
-   "nowrap" "pointer" "relative" "rgb" "rgba" "right" "rotate" "rotate3d"
-   "rotateX" "rotateY" "rotateZ" "rtl" "sans-serif" "scale" "scale3d"
-   "scaleX" "scaleY" "scaleZ" "serif" "skew" "skewX" "skewY" "small"
-   "smaller" "solid" "square" "static" "steps" "thin" "top" "translate"
-   "translate3d" "translateX" "translateY" "translateZ" "transparent"
-   "underline" "url" "wrap" "x-large" "xx-large"
 
+"!important"
+"absolute"
+"alpha"
+"auto"
+"avoid"
+"block"
+"bold"
+"both"
+"bottom"
+"break-word"
+"center"
+"collapse"
+"dashed"
+"dotted"
+"embed"
+"fixed"
+"flex"
+"flex-start"
+"flex-wrap"
+"grid"
+"help"
+"hidden"
+"hsl"
+"hsla"
+"inherit"
+"inline"
+"inline-block"
+"italic"
+"large"
+"left"
+"line-through"
 "linear-gradient"
+"ltr"
+"middle"
+"monospace"
+"no-repeat"
+"none"
+"normal"
+"nowrap"
+"pointer"
 "radial-gradient"
+"relative"
+"rgb"
+"rgba"
+"right"
+"rotate"
+"rotate3d"
+"rotateX"
+"rotateY"
+"rotateZ"
+"rtl"
+"sans-serif"
+"scale"
+"scale3d"
+"scaleX"
+"scaleY"
+"scaleZ"
+"serif"
+"skew"
+"skewX"
+"skewY"
+"small"
+"smaller"
+"solid"
+"square"
+"static"
+"steps"
+"table"
+"table-caption"
+"table-cell"
+"table-column"
+"table-column-group"
+"table-footer-group"
+"table-header-group"
+"table-row"
+"table-row-group"
+"thin"
+"top"
+"translate"
+"translate3d"
+"translateX"
+"translateY"
+"translateZ"
+"transparent"
+"underline"
+"url"
+"wrap"
+"x-large"
+"xx-large"
+
    ) )
 
 (defvar xah-css-color-names nil "List of CSS color names.")
@@ -431,12 +684,12 @@ This uses `ido-mode' user interface for completion."
 (setq xah-css-font-lock-keywords
       (let ( 
             (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ))
+            (htmlTagNames (regexp-opt xah-css-html-tag-names 'symbols))
             (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
             (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
             (cssColorNames (regexp-opt xah-css-color-names 'symbols))
             (cssUnitNames (regexp-opt xah-css-unit-names t ))
             (cssMedia (regexp-opt xah-css-media-keywords ))
-            (htmlTagNames (regexp-opt xah-css-html-tag-names 'symbols))
 )
         `(
           ("#[a-zA-z]+[0-9]*" . font-lock-defaults)
@@ -608,10 +861,6 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (run-mode-hooks 'xah-css-mode-hook))
 
 (provide 'xah-css-mode)
-
-;;; xah notes to self
-;; Visual Dictionary of CSS
-;; http://xahlee.info/js/css_index.html
 
 ;; Local Variables:
 ;; coding: utf-8
