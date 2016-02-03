@@ -1,0 +1,4 @@
+A emacs major mode for editing CSS code.
+
+Home page: http://ergoemacs.org/emacs/xah-css-mode.html
+
