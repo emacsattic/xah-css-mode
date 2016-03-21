@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.2.2
+;; Version: 1.3.2
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -486,6 +486,9 @@ Version 2015-06-29"
 "screen"
 "all"
 "speech"
+"and"
+"not"
+"only"
 ) ) ; todo
 
 (defvar xah-css-unit-names nil "List of CSS unite names.")
@@ -688,7 +691,7 @@ This uses `ido-mode' user interface for completion."
             (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
             (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
             (cssColorNames (regexp-opt xah-css-color-names 'symbols))
-            (cssUnitNames (regexp-opt xah-css-unit-names t ))
+            (cssUnitNames (regexp-opt xah-css-unit-names t))
             (cssMedia (regexp-opt xah-css-media-keywords ))
 )
         `(
