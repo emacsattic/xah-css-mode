@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.3.3
+;; Version: 1.4.3
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -688,7 +688,7 @@ This uses `ido-mode' user interface for completion."
 ;; syntax coloring related
 
 (setq xah-css-font-lock-keywords
-      (let ( 
+      (let (
             (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ))
             (htmlTagNames (regexp-opt xah-css-html-tag-names 'symbols))
             (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
@@ -851,11 +851,12 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (set-syntax-table xah-css-syntax-table)
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
 
-  (if (or
-       (not (boundp 'xfk-major-mode-lead-key))
-       (null 'xfk-major-mode-lead-key))
-      (define-key xah-css-key-map (kbd "<menu> e") xah-css-single-keys-map)
-    (define-key xah-css-key-map xfk-major-mode-lead-key xah-css-single-keys-map))
+  (define-key xah-css-key-map
+    (if (boundp 'xah-major-mode-lead-key)
+        xah-major-mode-lead-key
+      (kbd "C-c C-c"))
+    xah-css-single-keys-map)
+
   (use-local-map xah-css-key-map)
 
   (setq local-abbrev-table xah-css-abbrev-table)
