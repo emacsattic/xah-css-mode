@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.4.3
+;; Version: 1.5.3
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -695,8 +695,7 @@ This uses `ido-mode' user interface for completion."
             (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
             (cssColorNames (regexp-opt xah-css-color-names 'symbols))
             (cssUnitNames (regexp-opt xah-css-unit-names t))
-            (cssMedia (regexp-opt xah-css-media-keywords ))
-)
+            (cssMedia (regexp-opt xah-css-media-keywords )))
         `(
           ("#[a-zA-z]+[0-9]*" . font-lock-defaults)
           (,cssPseudoSelectorNames . font-lock-preprocessor-face)
@@ -704,7 +703,7 @@ This uses `ido-mode' user interface for completion."
           (,cssPropertieNames . font-lock-variable-name-face )
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-constant-face)
-          (,cssUnitNames . (1 font-lock-type-face) )
+          (,cssUnitNames . (1 font-lock-type-face))
           (,cssMedia . font-lock-builtin-face)
 
           ("#[abcdef[:digit:]]\\{6\\}" .
@@ -712,6 +711,20 @@ This uses `ido-mode' user interface for completion."
                (match-beginning 0)
                (match-end 0)
                'face (list :background (match-string-no-properties 0)))))
+
+          ("#[abcdef[:digit:]]\\{3\\}" .
+           (0 (put-text-property
+               (match-beginning 0)
+               (match-end 0)
+               'face
+               (list
+                :background
+                (let* (
+                       (matchStr (match-string-no-properties 0))
+                       (r (substring matchStr 1 2))
+                       (g (substring matchStr 2 3))
+                       (b (substring matchStr 3 4)))
+                  (format "#%s%s%s%s%s%s" r r g g b b))))))
 
           ("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
            (0 (put-text-property
@@ -724,13 +737,11 @@ This uses `ido-mode' user interface for completion."
                                                    (color-hsl-to-rgb
                                                     (/ (string-to-number (match-string-no-properties 1)) 360.0)
                                                     (/ (string-to-number (match-string-no-properties 2)) 100.0)
-                                                    (/ (string-to-number (match-string-no-properties 3)) 100.0)
-                                                    ) )
+                                                    (/ (string-to-number (match-string-no-properties 3)) 100.0)))
                                                   "" )) ;  "#00aa00"
                            ))))
 
-          ("'[^']+'" . font-lock-string-face)
-          ) ) )
+          ("'[^']+'" . font-lock-string-face))))
 
 
 ;; indent/reformat related
