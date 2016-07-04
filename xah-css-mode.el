@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.5.3
+;; Version: 1.5.4
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -24,7 +24,7 @@
 
 ;; • Keyword completion, with ido-mode interface. Press Tab key to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
 
-;; • Syntax coloring of hexadecimal color format #rrggbb and HSL Color format hsl(0,68%,42%).
+;; • Syntax coloring of hexadecimal color format #rrggbb #rgb and HSL Color format hsl(0,68%,42%).
 
 ;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
 
@@ -706,13 +706,13 @@ This uses `ido-mode' user interface for completion."
           (,cssUnitNames . (1 font-lock-type-face))
           (,cssMedia . font-lock-builtin-face)
 
-          ("#[abcdef[:digit:]]\\{6\\}" .
+          ("#[abcdef[:digit:]]\\{6,6\\}" .
            (0 (put-text-property
                (match-beginning 0)
                (match-end 0)
                'face (list :background (match-string-no-properties 0)))))
 
-          ("#[abcdef[:digit:]]\\{3\\}" .
+          ("#[abcdef[:digit:]]\\{3,3\\};" .
            (0 (put-text-property
                (match-beginning 0)
                (match-end 0)
@@ -720,26 +720,30 @@ This uses `ido-mode' user interface for completion."
                (list
                 :background
                 (let* (
-                       (matchStr (match-string-no-properties 0))
-                       (r (substring matchStr 1 2))
-                       (g (substring matchStr 2 3))
-                       (b (substring matchStr 3 4)))
-                  (format "#%s%s%s%s%s%s" r r g g b b))))))
+                       (ms (match-string-no-properties 0))
+                       (r (substring ms 1 2))
+                       (g (substring ms 2 3))
+                       (b (substring ms 3 4)))
+                  (concat "#" r r g g b b))))))
 
           ("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
            (0 (put-text-property
                (+ (match-beginning 0) 3)
                (match-end 0)
-               'face (list :background
-                           (concat "#" (mapconcat 'identity
-                                                  (mapcar
-                                                   (lambda (x) (format "%02x" (round (* x 255))))
-                                                   (color-hsl-to-rgb
-                                                    (/ (string-to-number (match-string-no-properties 1)) 360.0)
-                                                    (/ (string-to-number (match-string-no-properties 2)) 100.0)
-                                                    (/ (string-to-number (match-string-no-properties 3)) 100.0)))
-                                                  "" )) ;  "#00aa00"
-                           ))))
+               'face
+               (list
+                :background
+                (concat "#"
+                        (mapconcat
+                         'identity
+                         (mapcar
+                          (lambda (x) (format "%02x" (round (* x 255))))
+                          (color-hsl-to-rgb
+                           (/ (string-to-number (match-string-no-properties 1)) 360.0)
+                           (/ (string-to-number (match-string-no-properties 2)) 100.0)
+                           (/ (string-to-number (match-string-no-properties 3)) 100.0)))
+                         "" )) ;  "#00aa00"
+                ))))
 
           ("'[^']+'" . font-lock-string-face))))
 
