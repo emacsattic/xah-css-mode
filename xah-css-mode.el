@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.5.4
+;; Version: 1.5.5
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
