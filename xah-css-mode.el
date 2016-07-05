@@ -882,6 +882,8 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
   (run-mode-hooks 'xah-css-mode-hook))
 
+(add-to-list 'auto-mode-alist '("\\.css\\'" . xah-css-mode))
+
 (provide 'xah-css-mode)
 
 ;; Local Variables:
