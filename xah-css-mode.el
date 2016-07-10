@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.5.5
+;; Version: 1.5.6
 ;; Created: 18 April 2013
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -20,11 +20,11 @@
 
 ;; Features:
 
-;; • All CSS keywords are colored, and only CSS words (including CSS3). For example, the xyz in 「div.xyz {font-size:1.5rem}」, is not colored. This means, if you have a typo, you'll know. And you can easily tell which part of text is CSS, which part came from HTML user defined things, such as class name, id, and values.
+;; • All CSS keywords are colored, and only CSS words (including CSS3). For example, the xyz in 「div.xyz {font-size:1.5rem}」, is not colored. This means, if you have a typo, you'll know. You can easily tell which part of text is CSS, which part came from HTML user defined things, such as class name, id, and values.
 
 ;; • Keyword completion, with ido-mode interface. Press Tab key to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
 
-;; • Syntax coloring of hexadecimal color format #rrggbb #rgb and HSL Color format hsl(0,68%,42%).
+;; • Syntax coloring of hexadecimal color format #rrggbb , #rgb , and HSL Color format hsl(0,68%,42%).
 
 ;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
 
@@ -34,7 +34,7 @@
 
 ;; • Indentation is currently not supported by design. In works is function that re-format whole blocks of text, as in golang's gofmt.
 
-;; • This package is self-contained.
+;; • This package does not depend on any third party libraries.
 
 ;;; INSTALL:
 
