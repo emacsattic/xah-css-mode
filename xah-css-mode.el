@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.2
+;; Version: 2.3.4
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -758,8 +758,8 @@ This uses `ido-mode' user interface for completion."
 
 
 ;; syntax table
-(defvar xah-css-syntax-table nil "Syntax table for `xah-css-mode'.")
-(setq xah-css-syntax-table
+(defvar xah-css-mode-syntax-table nil "Syntax table for `xah-css-mode'.")
+(setq xah-css-mode-syntax-table
       (let ((synTable (make-syntax-table)))
 
 ;        (modify-syntax-entry ?0  "." synTable)
@@ -918,9 +918,9 @@ This is called by emacs abbrev system."
         (progn nil)
       t)))
 
-(setq xah-css-abbrev-table nil)
+(setq xah-css-mode-abbrev-table nil)
 
-(define-abbrev-table 'xah-css-abbrev-table
+(define-abbrev-table 'xah-css-mode-abbrev-table
   '(
 
     ("bgc" "background-color" nil :system t)
@@ -959,29 +959,28 @@ This is called by emacs abbrev system."
 
 ;; keybinding
 
-(defvar xah-css-map nil "Keybinding for `xah-css-mode'")
+(defvar xah-css-mode-map nil "Keybinding for `xah-css-mode'")
 
 (progn
-  (setq xah-css-map (make-sparse-keymap))
-  (define-key xah-css-map (kbd "TAB") 'xah-css-complete-or-indent)
+  (setq xah-css-mode-map (make-sparse-keymap))
+  (define-key xah-css-mode-map (kbd "TAB") 'xah-css-complete-or-indent)
 
-  (define-prefix-command 'xah-css-no-chord-key-map)
+  (define-prefix-command 'xah-css-mode-no-chord-map)
 
   ;; todo need to set these to also emacs's conventional major mode keys
-  (define-key xah-css-no-chord-key-map (kbd "r") 'xah-css-insert-random-color-hsl)
-  (define-key xah-css-no-chord-key-map (kbd "c") 'xah-css-hex-color-to-hsl)
-  (define-key xah-css-no-chord-key-map (kbd "p") 'xah-css-compact-css-region)
-  (define-key xah-css-no-chord-key-map (kbd "m") 'xah-css-minify)
-  (define-key xah-css-no-chord-key-map (kbd "e") 'xah-css-expand-to-multi-lines)
-  (define-key xah-css-no-chord-key-map (kbd "u") 'xah-css-complete-symbol)
+  (define-key xah-css-mode-no-chord-map (kbd "r") 'xah-css-insert-random-color-hsl)
+  (define-key xah-css-mode-no-chord-map (kbd "c") 'xah-css-hex-color-to-hsl)
+  (define-key xah-css-mode-no-chord-map (kbd "p") 'xah-css-compact-css-region)
+  (define-key xah-css-mode-no-chord-map (kbd "m") 'xah-css-minify)
+  (define-key xah-css-mode-no-chord-map (kbd "e") 'xah-css-expand-to-multi-lines)
+  (define-key xah-css-mode-no-chord-map (kbd "u") 'xah-css-complete-symbol)
 
-  ;  (define-key xah-css-map [remap comment-dwim] 'xah-css-comment-dwim)
+  ;  (define-key xah-css-mode-map [remap comment-dwim] 'xah-css-comment-dwim)
 
-  (define-key xah-css-map
-    (if (boundp 'xah-major-mode-lead-key)
-        xah-major-mode-lead-key
-      (kbd "C-c C-c"))
-    xah-css-no-chord-key-map))
+  ;; define separate, so that user can override the lead key
+  (define-key xah-css-mode-map (kbd "C-c C-c") xah-css-mode-no-chord-map)
+
+  )
 
 
 
@@ -991,18 +990,16 @@ This is called by emacs abbrev system."
 
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
-\\{xah-css-map}"
-  (set-syntax-table xah-css-syntax-table)
+\\{xah-css-mode-map}"
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
 
-  (use-local-map xah-css-map)
-
-  (setq local-abbrev-table xah-css-abbrev-table)
   (setq-local comment-start "/*")
   (setq-local comment-start-skip "/\\*+[ \t]*")
   (setq-local comment-end "*/")
   (setq-local comment-end-skip "[ \t]*\\*+/")
-)
+
+  :group 'xah-css-mode
+  )
 
 (add-to-list 'auto-mode-alist '("\\.css\\'" . xah-css-mode))
 
