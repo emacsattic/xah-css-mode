@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.0
+;; Version: 2.1.1
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -64,9 +64,29 @@
 
 (defface xah-css-id-selector
   '(
-    (t :foreground "firebrick"))
+    (t :foreground "firebrick" :weight bold))
   "face for CSS ID selector “#…”."
   :group 'xah-css-mode )
+
+(face-spec-set
+ 'xah-css-id-selector
+ '(
+   (t :foreground "firebrick" :weight bold))
+ 'face-defface-spec
+ )
+
+(defface xah-css-class-selector
+  '(
+    (t :weight bold))
+  "face for CSS class name selector “.…”."
+  :group 'xah-css-mode )
+
+(face-spec-set
+ 'xah-css-class-selector
+ '(
+   (t :weight bold))
+ 'face-defface-spec
+ )
 
 (defun xah-css-insert-random-color-hsl ()
   "Insert a random color string of CSS HSL format.
@@ -84,26 +104,26 @@ Version 2015-06-11"
   (interactive)
   (let* (
          (-bds (bounds-of-thing-at-point 'word))
-         (p1 (car -bds))
-         (p2 (cdr -bds))
-         (currentWord (buffer-substring-no-properties p1 p2)))
-    (if (string-match "[a-fA-F0-9]\\{6\\}" currentWord)
+         (-p1 (car -bds))
+         (-p2 (cdr -bds))
+         (-currentWord (buffer-substring-no-properties -p1 -p2)))
+    (if (string-match "[a-fA-F0-9]\\{6\\}" -currentWord)
         (progn
-          (delete-region p1 p2 )
+          (delete-region -p1 -p2 )
           (when (equal (char-before) 35) ; 35 is #
             (delete-char -1))
-          (insert (xah-css-hex-to-hsl-color currentWord )))
+          (insert (xah-css-hex-to-hsl-color -currentWord )))
       (progn
-        (user-error "The current word 「%s」 is not of the form #rrggbb." currentWord)))))
+        (user-error "The current word 「%s」 is not of the form #rrggbb." -currentWord)))))
 
-(defun xah-css-hex-to-hsl-color (φhex-str)
-  "Convert φhex-str color to CSS HSL format.
+(defun xah-css-hex-to-hsl-color (hex-str)
+  "Convert hex-str color to CSS HSL format.
 Return a string. Example:  \"ffefd5\" ⇒ \"hsl(37,100%,91%)\"
 Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2015-06-11"
   (let* (
-         (colorVec (xah-css-convert-color-hex-to-vec φhex-str))
+         (colorVec (xah-css-convert-color-hex-to-vec hex-str))
          (-R (elt colorVec 0))
          (-G (elt colorVec 1))
          (-B (elt colorVec 2))
@@ -113,8 +133,8 @@ Version 2015-06-11"
          (-L (elt hsl 2)))
     (format "hsl(%d,%d%%,%d%%)" (* -H 360) (* -S 100) (* -L 100))))
 
-(defun xah-css-convert-color-hex-to-vec (φrrggbb)
-  "Convert color φrrggbb from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
+(defun xah-css-convert-color-hex-to-vec (rrggbb)
+  "Convert color rrggbb from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
 Example:
  (xah-css-convert-color-hex-to-vec \"00ffcc\") ⇒ [0.0 1.0 0.8]
 
@@ -122,46 +142,46 @@ Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2015-06-11"
   (vector
-   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 0 2) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 2 4) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 4) 16) 255)))
+   (xah-css-normalize-number-scale (string-to-number (substring rrggbb 0 2) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring rrggbb 2 4) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring rrggbb 4) 16) 255)))
 
-(defun xah-css-normalize-number-scale (φval φrange-max)
-  "scale φval from range [0, φrange-max] to [0, 1]
+(defun xah-css-normalize-number-scale (val range-max)
+  "scale val from range [0, range-max] to [0, 1]
 The arguments can be int or float.
 Return value is float.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2015-06-11"
-  (/ (float φval) (float φrange-max)))
+  (/ (float val) (float range-max)))
 
 
 ;;; functions
 
-(defun xah-css--replace-regexp-pairs-region (φbegin φend φpairs &optional φfixedcase-p φliteral-p)
-  "Replace regex string find/replace ΦPAIRS in region.
+(defun xah-css--replace-regexp-pairs-region (begin end pairs &optional fixedcase-p literal-p)
+  "Replace regex string find/replace PAIRS in region.
 
-ΦBEGIN ΦEND are the region boundaries.
+BEGIN END are the region boundaries.
 
-ΦPAIRS is
+PAIRS is
  [[regexStr1 replaceStr1] [regexStr2 replaceStr2] …]
 It can be list or vector, for the elements or the entire argument.
 
-The optional arguments ΦFIXEDCASE-P and ΦLITERAL-P is the same as in `replace-match'.
+The optional arguments FIXEDCASE-P and LITERAL-P is the same as in `replace-match'.
 
 Find strings case sensitivity depends on `case-fold-search'. You can set it locally, like this: (let ((case-fold-search nil)) …)"
   (save-restriction
-      (narrow-to-region φbegin φend)
+      (narrow-to-region begin end)
       (mapc
-       (lambda (ξx)
+       (lambda (-x)
          (goto-char (point-min))
-         (while (search-forward-regexp (elt ξx 0) (point-max) t)
-           (replace-match (elt ξx 1) φfixedcase-p φliteral-p)))
-       φpairs)))
+         (while (search-forward-regexp (elt -x 0) (point-max) t)
+           (replace-match (elt -x 1) fixedcase-p literal-p)))
+       pairs)))
 
-(defun xah-css--replace-pairs-region (φbegin φend φpairs)
-  "Replace multiple ΦPAIRS of find/replace strings in region ΦBEGIN ΦEND.
+(defun xah-css--replace-pairs-region (begin end pairs)
+  "Replace multiple PAIRS of find/replace strings in region BEGIN END.
 
-ΦPAIRS is a sequence of pairs
+PAIRS is a sequence of pairs
  [[findStr1 replaceStr1] [findStr2 replaceStr2] …]
 It can be list or vector, for the elements or the entire argument.
 
@@ -169,47 +189,47 @@ Find strings case sensitivity depends on `case-fold-search'. You can set it loca
 
 The replacement are literal and case sensitive.
 
-Once a subsring in the buffer is replaced, that part will not change again.  For example, if the buffer content is “abcd”, and the φpairs are a → c and c → d, then, result is “cbdd”, not “dbdd”.
+Once a subsring in the buffer is replaced, that part will not change again.  For example, if the buffer content is “abcd”, and the pairs are a → c and c → d, then, result is “cbdd”, not “dbdd”.
 
-Note: the region's text or any string in ΦPAIRS is assumed to NOT contain any character from Unicode Private Use Area A. That is, U+F0000 to U+FFFFD. And, there are no more than 65534 pairs."
+Note: the region's text or any string in PAIRS is assumed to NOT contain any character from Unicode Private Use Area A. That is, U+F0000 to U+FFFFD. And, there are no more than 65534 pairs."
   (let (
-        (ξunicodePriveUseA #xf0000)
-        (ξi 0)
-        (ξtempMapPoints '()))
+        (-unicodePriveUseA #xf0000)
+        (-i 0)
+        (-tempMapPoints '()))
     (progn
       ;; generate a list of Unicode chars for intermediate replacement. These chars are in  Private Use Area.
-      (setq ξi 0)
-      (while (< ξi (length φpairs))
-        (push (char-to-string (+ ξunicodePriveUseA ξi)) ξtempMapPoints)
-        (setq ξi (1+ ξi))))
+      (setq -i 0)
+      (while (< -i (length pairs))
+        (push (char-to-string (+ -unicodePriveUseA -i)) -tempMapPoints)
+        (setq -i (1+ -i))))
     (save-excursion
       (save-restriction
-        (narrow-to-region φbegin φend)
+        (narrow-to-region begin end)
         (progn
-          ;; replace each find string by corresponding item in ξtempMapPoints
-          (setq ξi 0)
-          (while (< ξi (length φpairs))
+          ;; replace each find string by corresponding item in -tempMapPoints
+          (setq -i 0)
+          (while (< -i (length pairs))
             (goto-char (point-min))
-            (while (search-forward (elt (elt φpairs ξi) 0) nil t)
-              (replace-match (elt ξtempMapPoints ξi) t t))
-            (setq ξi (1+ ξi))))
+            (while (search-forward (elt (elt pairs -i) 0) nil t)
+              (replace-match (elt -tempMapPoints -i) t t))
+            (setq -i (1+ -i))))
         (progn
-          ;; replace each ξtempMapPoints by corresponding replacement string
-          (setq ξi 0)
-          (while (< ξi (length φpairs))
+          ;; replace each -tempMapPoints by corresponding replacement string
+          (setq -i 0)
+          (while (< -i (length pairs))
             (goto-char (point-min))
-            (while (search-forward (elt ξtempMapPoints ξi) nil t)
-              (replace-match (elt (elt φpairs ξi) 1) t t))
-            (setq ξi (1+ ξi))))))))
+            (while (search-forward (elt -tempMapPoints -i) nil t)
+              (replace-match (elt (elt pairs -i) 1) t t))
+            (setq -i (1+ -i))))))))
 
-(defun xah-css-compact-css-region (φbegin φend)
+(defun xah-css-compact-css-region (begin end)
   "Remove unnecessary whitespaces of CSS source code in region.
 WARNING: not robust.
 URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
 Version 2015-04-29"
   (interactive "r")
   (save-restriction
-    (narrow-to-region φbegin φend)
+    (narrow-to-region begin end)
     (xah-css--replace-regexp-pairs-region
      (point-min)
      (point-max)
@@ -508,6 +528,7 @@ Version 2015-06-29"
  xah-css-value-kwds
  '(
 
+"initial"
 "circle"
 "ellipse"
 "at"
@@ -541,7 +562,6 @@ Version 2015-06-29"
 "italic"
 "large"
 "left"
-"line-through"
 "linear-gradient"
 "ltr"
 "middle"
@@ -596,6 +616,9 @@ Version 2015-06-29"
 "translateZ"
 "transparent"
 "underline"
+"overline"
+"line-through"
+"blink"
 "url"
 "wrap"
 "x-large"
@@ -653,19 +676,19 @@ Version 2015-06-29"
 This uses `ido-mode' user interface for completion."
   (interactive)
   (let* (
-         (ξbds (bounds-of-thing-at-point 'symbol))
-         (ξp1 (car ξbds))
-         (ξp2 (cdr ξbds))
-         (ξcurrent-sym
-          (if  (or (null ξp1) (null ξp2) (equal ξp1 ξp2))
+         (-bds (bounds-of-thing-at-point 'symbol))
+         (-p1 (car -bds))
+         (-p2 (cdr -bds))
+         (-current-sym
+          (if  (or (null -p1) (null -p2) (equal -p1 -p2))
               ""
-            (buffer-substring-no-properties ξp1 ξp2)))
-         ξresult-sym)
-    (when (not ξcurrent-sym) (setq ξcurrent-sym ""))
-    (setq ξresult-sym
-          (ido-completing-read "" xah-css-all-keywords nil nil ξcurrent-sym ))
-    (delete-region ξp1 ξp2)
-    (insert ξresult-sym)))
+            (buffer-substring-no-properties -p1 -p2)))
+         -result-sym)
+    (when (not -current-sym) (setq -current-sym ""))
+    (setq -result-sym
+          (ido-completing-read "" xah-css-all-keywords nil nil -current-sym ))
+    (delete-region -p1 -p2)
+    (insert -result-sym)))
 
 
 ;; syntax table
@@ -702,16 +725,17 @@ This uses `ido-mode' user interface for completion."
             (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
             (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
             (cssColorNames (regexp-opt xah-css-color-names 'symbols))
-            (cssUnitNames (regexp-opt xah-css-unit-names t))
+            (cssUnitNames (regexp-opt xah-css-unit-names ))
             (cssMedia (regexp-opt xah-css-media-keywords )))
         `(
-          ("#[a-zA-z]+[0-9]*" . 'xah-css-id-selector)
+          ("#[-_a-zA-z]+[-_a-zA-z0-9]*" . 'xah-css-id-selector)
+          ("\\.[a-zA-z]+[-_a-zA-z0-9]*" . 'xah-css-class-selector)
           (,cssPseudoSelectorNames . font-lock-preprocessor-face)
           (,htmlTagNames . font-lock-function-name-face)
           (,cssPropertieNames . font-lock-variable-name-face )
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-constant-face)
-          (,cssUnitNames . (1 font-lock-type-face))
+          (,cssUnitNames . font-lock-type-face)
           (,cssMedia . font-lock-builtin-face)
 
           ("#[abcdef[:digit:]]\\{6,6\\}" .
@@ -769,8 +793,8 @@ If char before point is letters and char after point is whitespace or punctuatio
   ;; space▮char → do indent
   ;; char▮space → do completion
   ;; char ▮char → do indent
-  (let ( (ξsyntax-state (syntax-ppss)))
-    (if (or (nth 3 ξsyntax-state) (nth 4 ξsyntax-state))
+  (let ( (-syntax-state (syntax-ppss)))
+    (if (or (nth 3 -syntax-state) (nth 4 -syntax-state))
         (xah-css-prettify-root-sexp)
       (if
           (and (looking-back "[-_a-zA-Z]" 1)
@@ -783,29 +807,29 @@ If char before point is letters and char after point is whitespace or punctuatio
 Root sexp group is the outmost sexp unit."
   (interactive)
   (save-excursion
-    (let (ξp1 ξp2)
+    (let (-p1 -p2)
       (xah-css-goto-outmost-bracket)
-      (setq ξp1 (point))
-      (setq ξp2 (scan-sexps (point) 1))
+      (setq -p1 (point))
+      (setq -p2 (scan-sexps (point) 1))
       (progn
-        (goto-char ξp1)
+        (goto-char -p1)
         (indent-sexp)
         ))))
 
-(defun xah-css-goto-outmost-bracket (&optional φpos)
-  "Move cursor to the beginning of outer-most bracket, with respect to φpos.
+(defun xah-css-goto-outmost-bracket (&optional pos)
+  "Move cursor to the beginning of outer-most bracket, with respect to pos.
 Returns true if point is moved, else false."
   (interactive)
-  (let ((ξi 0)
-        (ξp0 (if (number-or-marker-p φpos)
-                 φpos
+  (let ((-i 0)
+        (-p0 (if (number-or-marker-p pos)
+                 pos
                (point))))
-    (goto-char ξp0)
+    (goto-char -p0)
     (while
-        (and (< (setq ξi (1+ ξi)) 20)
+        (and (< (setq -i (1+ -i)) 20)
              (not (eq (nth 0 (syntax-ppss (point))) 0)))
       (xah-css-up-list -1 "ESCAPE-STRINGS" "NO-SYNTAX-CROSSING"))
-    (if (equal ξp0 (point))
+    (if (equal -p0 (point))
         nil
       t
       )))
@@ -823,8 +847,8 @@ emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
 (defun xah-css-abbrev-enable-function ()
   "Determine whether to expand abbrev.
 This is called by emacs abbrev system."
-  (let ((ξsyntax-state (syntax-ppss)))
-    (if (or (nth 3 ξsyntax-state) (nth 4 ξsyntax-state))
+  (let ((-syntax-state (syntax-ppss)))
+    (if (or (nth 3 -syntax-state) (nth 4 -syntax-state))
         (progn nil)
       t)))
 
