@@ -3,8 +3,9 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 1.5.6
+;; Version: 2.0.0
 ;; Created: 18 April 2013
+;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
 
@@ -24,6 +25,8 @@
 
 ;; • Keyword completion, with ido-mode interface. Press Tab key to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
 
+;; • brainless indent. Press Tab key before a word to indent whole block.
+
 ;; • Syntax coloring of hexadecimal color format #rrggbb , #rgb , and HSL Color format hsl(0,68%,42%).
 
 ;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
@@ -31,10 +34,6 @@
 ;; • Call `xah-css-compact-css-region' to compact region.
 
 ;; • Call `describe-function' on `xah-css-mode' for detail.
-
-;; • Indentation is currently not supported by design. In works is function that re-format whole blocks of text, as in golang's gofmt.
-
-;; • This package does not depend on any third party libraries.
 
 ;;; INSTALL:
 
@@ -55,12 +54,19 @@
 
 ;;; Code:
 
-(require 'color) ; part of emacs 24.3
-(require 'newcomment) ; part of emacs
+(require 'color) ; part of emacs 24.1
+(require 'newcomment)
+(require 'lisp-mode) ; for indent-sexp. todo possibly write own customized for css
 
 (defvar xah-css-mode-hook nil "Standard hook for `xah-css-mode'")
 
 
+
+(defface xah-css-id-selector
+  '(
+    (t :foreground "firebrick"))
+  "face for CSS ID selector “#…”."
+  :group 'xah-css-mode )
 
 (defun xah-css-insert-random-color-hsl ()
   "Insert a random color string of CSS HSL format.
@@ -77,46 +83,48 @@ URL `http://ergoemacs.org/emacs/elisp_convert_rgb_hsl_color.html'
 Version 2015-06-11"
   (interactive)
   (let* (
-         (bds (bounds-of-thing-at-point 'word))
-         (p1 (car bds))
-         (p2 (cdr bds))
+         (-bds (bounds-of-thing-at-point 'word))
+         (p1 (car -bds))
+         (p2 (cdr -bds))
          (currentWord (buffer-substring-no-properties p1 p2)))
     (if (string-match "[a-fA-F0-9]\\{6\\}" currentWord)
         (progn
           (delete-region p1 p2 )
-          (if (looking-back "#") (delete-char -1))
+          (when (equal (char-before) 35) ; 35 is #
+            (delete-char -1))
           (insert (xah-css-hex-to-hsl-color currentWord )))
       (progn
         (user-error "The current word 「%s」 is not of the form #rrggbb." currentWord)))))
 
 (defun xah-css-hex-to-hsl-color (φhex-str)
   "Convert φhex-str color to CSS HSL format.
-Return a string. ⁖  \"#ffefd5\" ⇒ \"hsl(37,100%,91%)\"
+Return a string. Example:  \"ffefd5\" ⇒ \"hsl(37,100%,91%)\"
+Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2015-06-11"
   (let* (
          (colorVec (xah-css-convert-color-hex-to-vec φhex-str))
-         (xR (elt colorVec 0))
-         (xG (elt colorVec 1))
-         (xB (elt colorVec 2))
-         (hsl (color-rgb-to-hsl xR xG xB))
-         (xH (elt hsl 0))
-         (xS (elt hsl 1))
-         (xL (elt hsl 2)))
-    (format "hsl(%d,%d%%,%d%%)" (* xH 360) (* xS 100) (* xL 100))))
+         (-R (elt colorVec 0))
+         (-G (elt colorVec 1))
+         (-B (elt colorVec 2))
+         (hsl (color-rgb-to-hsl -R -G -B))
+         (-H (elt hsl 0))
+         (-S (elt hsl 1))
+         (-L (elt hsl 2)))
+    (format "hsl(%d,%d%%,%d%%)" (* -H 360) (* -S 100) (* -L 100))))
 
-(defun xah-css-convert-color-hex-to-vec (φhexcolor)
-  "Convert φhexcolor from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
+(defun xah-css-convert-color-hex-to-vec (φrrggbb)
+  "Convert color φrrggbb from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
 Example:
  (xah-css-convert-color-hex-to-vec \"00ffcc\") ⇒ [0.0 1.0 0.8]
 
-Note: The input string must NOT start with “#”. If so, the return value is nil.
+Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2015-06-11"
   (vector
-   (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 0 2) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 2 4) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring φhexcolor 4) 16) 255)))
+   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 0 2) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 2 4) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring φrrggbb 4) 16) 255)))
 
 (defun xah-css-normalize-number-scale (φval φrange-max)
   "scale φval from range [0, φrange-max] to [0, 1]
@@ -627,7 +635,7 @@ Version 2015-06-29"
 "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet"
 "wheat" "white" "whitesmoke" "yellow" "yellowgreen") )
 
-(defvar xah-css-all-keywords nil "List of all elisp keywords")
+(defvar xah-css-all-keywords nil "List of all CSS keywords")
 (setq xah-css-all-keywords (append xah-css-html-tag-names
                                      xah-css-color-names
                                      xah-css-property-names
@@ -697,7 +705,7 @@ This uses `ido-mode' user interface for completion."
             (cssUnitNames (regexp-opt xah-css-unit-names t))
             (cssMedia (regexp-opt xah-css-media-keywords )))
         `(
-          ("#[a-zA-z]+[0-9]*" . font-lock-defaults)
+          ("#[a-zA-z]+[0-9]*" . 'xah-css-id-selector)
           (,cssPseudoSelectorNames . font-lock-preprocessor-face)
           (,htmlTagNames . font-lock-function-name-face)
           (,cssPropertieNames . font-lock-variable-name-face )
@@ -763,18 +771,52 @@ If char before point is letters and char after point is whitespace or punctuatio
   ;; char ▮char → do indent
   (let ( (ξsyntax-state (syntax-ppss)))
     (if (or (nth 3 ξsyntax-state) (nth 4 ξsyntax-state))
-        (progn
-          (xah-css-prettify-root-sexp))
-      (progn (if
-                 (and (looking-back "[-_a-zA-Z]")
-                      (or (eobp) (looking-at "[\n[:blank:][:punct:]]")))
-                 (xah-css-complete-symbol)
-               (xah-css-indent-line))))))
+        (xah-css-prettify-root-sexp)
+      (if
+          (and (looking-back "[-_a-zA-Z]" 1)
+               (or (eobp) (looking-at "[\n[:blank:][:punct:]]")))
+          (xah-css-complete-symbol)
+        (xah-css-prettify-root-sexp)))))
 
-(defun xah-css-indent-line ()
-  "i do nothing."
-  (let ()
-    nil))
+(defun xah-css-prettify-root-sexp ()
+  "Prettify format current root sexp group.
+Root sexp group is the outmost sexp unit."
+  (interactive)
+  (save-excursion
+    (let (ξp1 ξp2)
+      (xah-css-goto-outmost-bracket)
+      (setq ξp1 (point))
+      (setq ξp2 (scan-sexps (point) 1))
+      (progn
+        (goto-char ξp1)
+        (indent-sexp)
+        ))))
+
+(defun xah-css-goto-outmost-bracket (&optional φpos)
+  "Move cursor to the beginning of outer-most bracket, with respect to φpos.
+Returns true if point is moved, else false."
+  (interactive)
+  (let ((ξi 0)
+        (ξp0 (if (number-or-marker-p φpos)
+                 φpos
+               (point))))
+    (goto-char ξp0)
+    (while
+        (and (< (setq ξi (1+ ξi)) 20)
+             (not (eq (nth 0 (syntax-ppss (point))) 0)))
+      (xah-css-up-list -1 "ESCAPE-STRINGS" "NO-SYNTAX-CROSSING"))
+    (if (equal ξp0 (point))
+        nil
+      t
+      )))
+
+(defun xah-css-up-list (arg1 &optional arg2 arg3)
+  "Backward compatibility fix for emacs 24.4's `up-list'.
+emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
+  (interactive)
+  (if (>= emacs-major-version 25)
+      (up-list arg1 arg2 arg3)
+    (up-list arg1)))
 
 
 
@@ -827,9 +869,6 @@ This is called by emacs abbrev system."
 
 ;; keybinding
 
-(when (string-equal system-type "windows-nt")
-  (define-key key-translation-map (kbd "<apps>") (kbd "<menu>")))
-
 (defvar xah-css-key-map nil "Keybinding for `xah-css-mode'")
 
 (progn
@@ -843,21 +882,25 @@ This is called by emacs abbrev system."
   (define-key xah-css-single-keys-map (kbd "c") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-single-keys-map (kbd "p") 'xah-css-compact-css-region)
   (define-key xah-css-single-keys-map (kbd "u") 'xah-css-complete-symbol)
-  (define-key xah-css-single-keys-map (kbd "i") 'xah-css-indent-line)
 
   ;  (define-key xah-css-key-map [remap comment-dwim] 'xah-css-comment-dwim)
-  )
+
+  (define-key xah-css-key-map
+    (if (boundp 'xah-major-mode-lead-key)
+        xah-major-mode-lead-key
+      (kbd "C-c C-c"))
+    xah-css-single-keys-map))
 
 
 
 ;;;###autoload
-(defun xah-css-mode ()
+(define-derived-mode xah-css-mode prog-mode "ξCSS"
   "A major mode for CSS.
 
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
 \\{xah-css-key-map}"
-  (interactive)
+
   (kill-all-local-variables)
 
   (setq mode-name "ξCSS")
@@ -865,12 +908,6 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
   (set-syntax-table xah-css-syntax-table)
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
-
-  (define-key xah-css-key-map
-    (if (boundp 'xah-major-mode-lead-key)
-        xah-major-mode-lead-key
-      (kbd "C-c C-c"))
-    xah-css-single-keys-map)
 
   (use-local-map xah-css-key-map)
 
@@ -880,7 +917,9 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (setq-local comment-end "*/")
   (setq-local comment-end-skip "[ \t]*\\*+/")
 
-  (run-mode-hooks 'xah-css-mode-hook))
+  (run-mode-hooks 'xah-css-mode-hook)
+
+)
 
 (add-to-list 'auto-mode-alist '("\\.css\\'" . xah-css-mode))
 
