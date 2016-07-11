@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.2.1
+;; Version: 2.3.2
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -21,17 +21,23 @@
 
 ;; Features:
 
-;; • All CSS keywords are colored, and only CSS words (including CSS3). For example, the xyz in 「div.xyz {font-size:1.5rem}」, is not colored. This means, if you have a typo, you'll know. You can easily tell which part of text is CSS, which part came from HTML user defined things, such as class name, id, and values.
+;; • Correct Syntax coloring ALL CSS words. Does not color typos.
 
-;; • Keyword completion, with ido-mode interface. Press Tab key to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors words, “at keywords”, …}.
+;; • Color coded words by semantics. Each type of CSS words are colored distinctly. e.g. HTML tag names, CSS attribute names, predefined CSS value names, CSS unit names, pseudo selector names, media keywords, etc.
 
-;; • brainless indent. Press Tab key before a word to indent whole block.
+;; • ID selector string and class name in bold for easy identification.
+
+;; • Keyword completion with `ido-mode' interface. Press Tab ↹ after a word to complete. All CSS words are supported: {html5 tags, property names, property value keywords, units, colors, pseudo selectors, “at keywords”, …}.
+
+ ;; • Single Key Prettify Code Format. Press Tab ↹ before word to reformat current block of code. That is, all lines enclosed by curly brackets {}.
 
 ;; • Syntax coloring of hexadecimal color format #rrggbb , #rgb , and HSL Color format hsl(0,68%,42%).
 
 ;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
 
-;; • Call `xah-css-compact-css-region' to compact region.
+;; • Call `xah-css-minify' to compact region.
+
+;; • Call `xah-css-expand-to-multi-lines' to expand minified CSS code to multi-lines format.
 
 ;; • Call `describe-function' on `xah-css-mode' for detail.
 
@@ -68,18 +74,19 @@
   "face for CSS ID selector “#…”."
   :group 'xah-css-mode )
 
+(defface xah-css-class-selector
+  '(
+    (t :weight bold))
+  "face for CSS class name selector “.…”."
+  :group 'xah-css-mode )
+
+;; temp for debugging
 (face-spec-set
  'xah-css-id-selector
  '(
    (t :foreground "firebrick" :weight bold))
  'face-defface-spec
  )
-
-(defface xah-css-class-selector
-  '(
-    (t :weight bold))
-  "face for CSS class name selector “.…”."
-  :group 'xah-css-mode )
 
 (face-spec-set
  'xah-css-class-selector
@@ -249,15 +256,50 @@ Version 2015-04-29"
        ["}" "}\n"]
        ))))
 
-(defun xah-css-expand-css-region (begin end)
-  "reformat so it's multiple lines.
+(defun xah-css-minify (&optional begin end)
+  "Remove unnecessary whitespaces of CSS source code in region.
+If there's text selection, work on that region.
+Else, work on whole buffer.
+Version 2016-07-11"
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (point-min) (point-max))))
+  (save-restriction
+    (narrow-to-region begin end)
+    (xah-css--replace-regexp-pairs-region
+     (point-min)
+     (point-max)
+     '(["  +" " "]))
+    (xah-css--replace-pairs-region
+     (point-min)
+     (point-max)
+     '(
+       ["\n" " "]
+       [" /* " "/*"]
+       [" */ " "*/"]
+       [" {" "{"]
+       ["{ " "{"]
+       ["; " ";"]
+       [": " ":"]
+       [" }" "}"]
+       [";}" "}"]
+       ["}" "}\n"]
+       ))))
+
+(defun xah-css-expand-to-multi-lines (&optional begin end)
+  "Expand minified CSS code to multiple lines.
+If there's text selection, work on that region.
+Else, work on whole buffer.
 Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added.
 todo a proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
 Version 2016-07-10"
-  (interactive "r")
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (point-min) (point-max))))
   (save-restriction
     (narrow-to-region begin end)
-
     (xah-css--replace-pairs-region
      (point-min)
      (point-max)
@@ -268,12 +310,10 @@ Version 2016-07-10"
        ["{" "\n{\n"]
        ["}" "\n}\n"]
        ))
-
     (xah-css--replace-regexp-pairs-region
      (point-min)
      (point-max)
-     '(["\n\n+" "\n\n"]))
-    ))
+     '(["\n\n+" "\n\n"]))))
 
 (defun xah-css-compact-block ()
   "Compact current CSS code block.
@@ -919,28 +959,29 @@ This is called by emacs abbrev system."
 
 ;; keybinding
 
-(defvar xah-css-key-map nil "Keybinding for `xah-css-mode'")
+(defvar xah-css-map nil "Keybinding for `xah-css-mode'")
 
 (progn
-  (setq xah-css-key-map (make-sparse-keymap))
-  (define-key xah-css-key-map (kbd "TAB") 'xah-css-complete-or-indent)
+  (setq xah-css-map (make-sparse-keymap))
+  (define-key xah-css-map (kbd "TAB") 'xah-css-complete-or-indent)
 
-  (define-prefix-command 'xah-css-single-keys-map)
+  (define-prefix-command 'xah-css-no-chord-key-map)
 
   ;; todo need to set these to also emacs's conventional major mode keys
-  (define-key xah-css-single-keys-map (kbd "r") 'xah-css-insert-random-color-hsl)
-  (define-key xah-css-single-keys-map (kbd "c") 'xah-css-hex-color-to-hsl)
-  (define-key xah-css-single-keys-map (kbd "p") 'xah-css-compact-css-region)
-  (define-key xah-css-single-keys-map (kbd "e") 'xah-css-expand-css-region)
-  (define-key xah-css-single-keys-map (kbd "u") 'xah-css-complete-symbol)
+  (define-key xah-css-no-chord-key-map (kbd "r") 'xah-css-insert-random-color-hsl)
+  (define-key xah-css-no-chord-key-map (kbd "c") 'xah-css-hex-color-to-hsl)
+  (define-key xah-css-no-chord-key-map (kbd "p") 'xah-css-compact-css-region)
+  (define-key xah-css-no-chord-key-map (kbd "m") 'xah-css-minify)
+  (define-key xah-css-no-chord-key-map (kbd "e") 'xah-css-expand-to-multi-lines)
+  (define-key xah-css-no-chord-key-map (kbd "u") 'xah-css-complete-symbol)
 
-  ;  (define-key xah-css-key-map [remap comment-dwim] 'xah-css-comment-dwim)
+  ;  (define-key xah-css-map [remap comment-dwim] 'xah-css-comment-dwim)
 
-  (define-key xah-css-key-map
+  (define-key xah-css-map
     (if (boundp 'xah-major-mode-lead-key)
         xah-major-mode-lead-key
       (kbd "C-c C-c"))
-    xah-css-single-keys-map))
+    xah-css-no-chord-key-map))
 
 
 
@@ -950,11 +991,11 @@ This is called by emacs abbrev system."
 
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
-\\{xah-css-key-map}"
+\\{xah-css-map}"
   (set-syntax-table xah-css-syntax-table)
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
 
-  (use-local-map xah-css-key-map)
+  (use-local-map xah-css-map)
 
   (setq local-abbrev-table xah-css-abbrev-table)
   (setq-local comment-start "/*")
