@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.1.1
+;; Version: 2.2.1
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -248,6 +248,32 @@ Version 2015-04-29"
        [";}" "}"]
        ["}" "}\n"]
        ))))
+
+(defun xah-css-expand-css-region (begin end)
+  "reformat so it's multiple lines.
+Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added.
+todo a proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
+Version 2016-07-10"
+  (interactive "r")
+  (save-restriction
+    (narrow-to-region begin end)
+
+    (xah-css--replace-pairs-region
+     (point-min)
+     (point-max)
+     '(
+       [";" ";\n"]
+       ["/* " "\n/*"]
+       ["*/" "*/\n"]
+       ["{" "\n{\n"]
+       ["}" "\n}\n"]
+       ))
+
+    (xah-css--replace-regexp-pairs-region
+     (point-min)
+     (point-max)
+     '(["\n\n+" "\n\n"]))
+    ))
 
 (defun xah-css-compact-block ()
   "Compact current CSS code block.
@@ -905,6 +931,7 @@ This is called by emacs abbrev system."
   (define-key xah-css-single-keys-map (kbd "r") 'xah-css-insert-random-color-hsl)
   (define-key xah-css-single-keys-map (kbd "c") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-single-keys-map (kbd "p") 'xah-css-compact-css-region)
+  (define-key xah-css-single-keys-map (kbd "e") 'xah-css-expand-css-region)
   (define-key xah-css-single-keys-map (kbd "u") 'xah-css-complete-symbol)
 
   ;  (define-key xah-css-key-map [remap comment-dwim] 'xah-css-comment-dwim)
