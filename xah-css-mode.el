@@ -951,12 +951,6 @@ This is called by emacs abbrev system."
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
 \\{xah-css-key-map}"
-
-  (kill-all-local-variables)
-
-  (setq mode-name "ξCSS")
-  (setq major-mode 'xah-css-mode)
-
   (set-syntax-table xah-css-syntax-table)
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
 
@@ -967,9 +961,6 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (setq-local comment-start-skip "/\\*+[ \t]*")
   (setq-local comment-end "*/")
   (setq-local comment-end-skip "[ \t]*\\*+/")
-
-  (run-mode-hooks 'xah-css-mode-hook)
-
 )
 
 (add-to-list 'auto-mode-alist '("\\.css\\'" . xah-css-mode))
