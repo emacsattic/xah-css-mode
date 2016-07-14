@@ -1,4 +1,8 @@
 A emacs major mode for editing CSS code.
 
+[[http://melpa.org/#/xah-elisp-mode][file:http://melpa.org/packages/xah-css-mode-badge.svg]]
+
+It is, FANTASTIC!
+
 Home page: http://ergoemacs.org/emacs/xah-css-mode.html
 
