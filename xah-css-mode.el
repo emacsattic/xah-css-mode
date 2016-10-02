@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.6
+;; Version: 2.4.6
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -230,38 +230,13 @@ Note: the region's text or any string in PAIRS is assumed to NOT contain any cha
               (replace-match (elt (elt pairs -i) 1) t t))
             (setq -i (1+ -i))))))))
 
-(defun xah-css-compact-css-region (*begin *end)
-  "Remove unnecessary whitespaces of CSS source code in region.
-WARNING: not robust.
-URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
-Version 2015-04-29"
-  (interactive "r")
-  (save-restriction
-    (narrow-to-region *begin *end)
-    (xah-css--replace-regexp-pairs-region
-     (point-min)
-     (point-max)
-     '(["  +" " "]))
-    (xah-css--replace-pairs-region
-     (point-min)
-     (point-max)
-     '(
-       ["\n" " "]
-       [" /* " "/*"]
-       [" */ " "*/"]
-       [" {" "{"]
-       ["{ " "{"]
-       ["; " ";"]
-       [": " ":"]
-       [";}" "}"]
-       ["}" "}\n"]
-       ))))
-
-(defun xah-css-minify (&optional *begin *end)
+(defun xah-css-compact-css-region (&optional *begin *end)
   "Remove unnecessary whitespaces of CSS source code in region.
 If there's text selection, work on that region.
 Else, work on whole buffer.
-Version 2016-07-11"
+WARNING: not 99% robust. This command work by doing string replacement. Can get wrong if you have a string or comment. Worst will happen is whitespace gets inserted/removed in string or comment.
+URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
+Version 2016-10-02"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -283,10 +258,11 @@ Version 2016-07-11"
        ["{ " "{"]
        ["; " ";"]
        [": " ":"]
-       [" }" "}"]
        [";}" "}"]
        ["}" "}\n"]
        ))))
+
+(defalias 'xah-css-minify 'xah-css-compact-css-region)
 
 (defun xah-css-expand-to-multi-lines (&optional *begin *end)
   "Expand minified CSS code to multiple lines.
@@ -294,7 +270,7 @@ If there's text selection, work on that region.
 Else, work on whole buffer.
 Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added.
 todo a proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
-Version 2016-07-10"
+Version 2016-10-02"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -314,7 +290,9 @@ Version 2016-07-10"
     (xah-css--replace-regexp-pairs-region
      (point-min)
      (point-max)
-     '(["\n\n+" "\n\n"]))))
+     '(
+       ["\n+" "\n"]
+       ))))
 
 (defun xah-css-compact-block ()
   "Compact current CSS code block.
@@ -882,6 +860,8 @@ Root sexp group is the outmost sexp unit."
       (progn
         (goto-char -p1)
         (indent-sexp)
+        ;; (indent-region -p1 -p2)
+        ;; (c-indent-region -p1 -p2)
         ))))
 
 (defun xah-css-goto-outmost-bracket (&optional pos)
