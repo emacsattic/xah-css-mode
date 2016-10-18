@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.4.6
+;; Version: 2.4.7
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -35,7 +35,7 @@
 
 ;; • Call `xah-css-hex-to-hsl-color' to convert #rrggbb color format under cursor to HSL Color format.
 
-;; • Call `xah-css-minify' to compact region.
+;; • Call `xah-css-compact-css-region' to minify region.
 
 ;; • Call `xah-css-expand-to-multi-lines' to expand minified CSS code to multi-lines format.
 
@@ -51,7 +51,7 @@
 
 ;;; HISTORY
 
-;; version history no longer kept here.
+;; version history no longer kept here. See git log.
 ;; version 2015-01-30 fix a problem with emacs 24.3.1, Debugger entered--Lisp error: (file-error "Cannot open load file" "prog-mode")
 ;; version 0.3, 2013-05-02 added xah-css-hex-color-to-hsl, and other improvements.
 ;; version 0.2, 2013-04-22 added xah-css-compact-css-region
@@ -230,6 +230,33 @@ Note: the region's text or any string in PAIRS is assumed to NOT contain any cha
               (replace-match (elt (elt pairs -i) 1) t t))
             (setq -i (1+ -i))))))))
 
+(defun xah-css-compact-block ()
+  "Compact current CSS code block.
+A block is surrounded by blank lines.
+This command basically replace newline char by space.
+Version 2015-06-29"
+  (interactive)
+  (let (-p1 -p2)
+    (save-excursion
+      (if (re-search-backward "\n[ \t]*\n" nil "move")
+          (progn (re-search-forward "\n[ \t]*\n")
+                 (setq -p1 (point)))
+        (setq -p1 (point)))
+      (if (re-search-forward "\n[ \t]*\n" nil "move")
+          (progn (re-search-backward "\n[ \t]*\n")
+                 (setq -p2 (point)))
+        (setq -p2 (point))))
+    (save-restriction
+      (narrow-to-region -p1 -p2)
+
+      (goto-char (point-min))
+      (while (search-forward "\n" nil "NOERROR")
+        (replace-match " "))
+
+      (goto-char (point-min))
+      (while (search-forward-regexp "  +" nil "NOERROR")
+        (replace-match " ")))))
+
 (defun xah-css-compact-css-region (&optional *begin *end)
   "Remove unnecessary whitespaces of CSS source code in region.
 If there's text selection, work on that region.
@@ -262,8 +289,6 @@ Version 2016-10-02"
        ["}" "}\n"]
        ))))
 
-(defalias 'xah-css-minify 'xah-css-compact-css-region)
-
 (defun xah-css-expand-to-multi-lines (&optional *begin *end)
   "Expand minified CSS code to multiple lines.
 If there's text selection, work on that region.
@@ -293,33 +318,6 @@ Version 2016-10-02"
      '(
        ["\n+" "\n"]
        ))))
-
-(defun xah-css-compact-block ()
-  "Compact current CSS code block.
-A block is surrounded by blank lines.
-This command basically replace newline char by space.
-Version 2015-06-29"
-  (interactive)
-  (let (-p1 -p2)
-    (save-excursion
-      (if (re-search-backward "\n[ \t]*\n" nil "move")
-          (progn (re-search-forward "\n[ \t]*\n")
-                 (setq -p1 (point)))
-        (setq -p1 (point)))
-      (if (re-search-forward "\n[ \t]*\n" nil "move")
-          (progn (re-search-backward "\n[ \t]*\n")
-                 (setq -p2 (point)))
-        (setq -p2 (point))))
-    (save-restriction
-      (narrow-to-region -p1 -p2)
-
-      (goto-char (point-min))
-      (while (search-forward "\n" nil "NOERROR")
-        (replace-match " "))
-
-      (goto-char (point-min))
-      (while (search-forward-regexp "  +" nil "NOERROR")
-        (replace-match " ")))))
 
 
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
@@ -929,6 +927,24 @@ This is called by emacs abbrev system."
     ("translateY" "translateY(▮)" nil :system t)
     ("translateZ" "translateZ(▮)" nil :system t)
 
+    ("zwhite" "#ffffff" nil :system t)
+    ("zsilver" "#c0c0c0" nil :system t)
+    ("zgray" "#808080" nil :system t)
+    ("zblack" "#000000" nil :system t)
+    ("zred" "#ff0000" nil :system t)
+    ("zmaroon" "#800000" nil :system t)
+    ("zyellow" "#ffff00" nil :system t)
+    ("zolive" "#808000" nil :system t)
+    ("zlime" "#00ff00" nil :system t)
+    ("zgreen" "#008000" nil :system t)
+    ("zaqua" "#00ffff" nil :system t)
+    ("zteal" "#008080" nil :system t)
+    ("zblue" "#0000ff" nil :system t)
+    ("znavy" "#000080" nil :system t)
+    ("zfuchsia" "#ff00ff" nil :system t)
+    ("zpurple" "#800080" nil :system t)
+    ("zorange" "#ffa500" nil :system t)
+
 )
 
   "abbrev table for `xah-css-mode'"
@@ -953,7 +969,6 @@ This is called by emacs abbrev system."
   (define-key xah-css-mode-no-chord-map (kbd "r") 'xah-css-insert-random-color-hsl)
   (define-key xah-css-mode-no-chord-map (kbd "c") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-mode-no-chord-map (kbd "p") 'xah-css-compact-css-region)
-  (define-key xah-css-mode-no-chord-map (kbd "m") 'xah-css-minify)
   (define-key xah-css-mode-no-chord-map (kbd "e") 'xah-css-expand-to-multi-lines)
   (define-key xah-css-mode-no-chord-map (kbd "u") 'xah-css-complete-symbol)
 
