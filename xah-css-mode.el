@@ -2,8 +2,8 @@
 
 ;; Copyright © 2013-2015 by Xah Lee
 
-;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.4.8
+;; Author: Xah Lee ( http://xahlee.info/ )
+;; Version: 2.4.9
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -929,7 +929,6 @@ Version 2016-10-24"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (message "pos is %s" *pos)
   (let ((-found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
     (when -found-p (forward-char ))
     -found-p
@@ -1040,13 +1039,9 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (setq-local comment-end-skip "[ \t]*\\*+/")
 
   (make-local-variable 'abbrev-expand-function)
-  (if (or
-       (and (>= emacs-major-version 24)
-            (>= emacs-minor-version 4))
-       (>= emacs-major-version 25))
-      (progn
-        (setq abbrev-expand-function 'xah-css-expand-abbrev))
-    (progn (add-hook 'abbrev-expand-functions 'xah-css-expand-abbrev nil t)))
+  (if (version< emacs-version "24.4")
+      (add-hook 'abbrev-expand-functions 'xah-css-expand-abbrev nil t)
+    (setq abbrev-expand-function 'xah-css-expand-abbrev))
 
   (abbrev-mode 1)
 
