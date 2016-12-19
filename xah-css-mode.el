@@ -1,9 +1,9 @@
-;;; xah-css-mode.el --- Major mode for editing CSS code.
+;;; xah-css-mode.el --- Major mode for editing CSS code. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2015 by Xah Lee
+;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.9
+;; Version: 2.4.10
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -851,10 +851,13 @@ If char before point is letters and char after point is whitespace or punctuatio
 Root sexp group is the outmost sexp unit."
   (interactive)
   (save-excursion
-    (let (-p1 -p2)
+    (let (-p1
+          ;; -p2
+          )
       (xah-css-goto-outmost-bracket)
       (setq -p1 (point))
-      (setq -p2 (scan-sexps (point) 1))
+      (scan-sexps -p1 1)
+      ;; (setq -p2 (point))
       (progn
         (goto-char -p1)
         (indent-sexp)
@@ -1051,10 +1054,6 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 (add-to-list 'auto-mode-alist '("\\.css\\'" . xah-css-mode))
 
 (provide 'xah-css-mode)
-
-;; Local Variables:
-;; coding: utf-8
-;; End:
 
 ;;; xah-css-mode.el ends here
 
