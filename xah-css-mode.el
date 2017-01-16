@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.10
+;; Version: 2.4.11
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -250,11 +250,11 @@ Version 2015-06-29"
       (narrow-to-region -p1 -p2)
 
       (goto-char (point-min))
-      (while (search-forward "\n" nil "NOERROR")
+      (while (search-forward "\n" nil t)
         (replace-match " "))
 
       (goto-char (point-min))
-      (while (search-forward-regexp "  +" nil "NOERROR")
+      (while (search-forward-regexp "  +" nil t)
         (replace-match " ")))))
 
 (defun xah-css-compact-css-region (&optional *begin *end)
