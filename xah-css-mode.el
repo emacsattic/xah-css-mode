@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.11
+;; Version: 2.4.12
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -772,8 +772,8 @@ This uses `ido-mode' user interface for completion."
             (cssUnitNames (regexp-opt xah-css-unit-names ))
             (cssMedia (regexp-opt xah-css-media-keywords )))
         `(
-          ("#[-_a-zA-z]+[-_a-zA-z0-9]*" . 'xah-css-id-selector)
-          ("\\.[a-zA-z]+[-_a-zA-z0-9]*" . 'xah-css-class-selector)
+          ("#[-_a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-id-selector)
+          ("\\.[a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-class-selector)
           (,cssPseudoSelectorNames . font-lock-preprocessor-face)
           (,htmlTagNames . font-lock-function-name-face)
           (,cssPropertieNames . font-lock-variable-name-face )
@@ -782,13 +782,13 @@ This uses `ido-mode' user interface for completion."
           (,cssUnitNames . font-lock-type-face)
           (,cssMedia . font-lock-builtin-face)
 
-          ("#[abcdef[:digit:]]\\{6,6\\}" .
+          ("#[[:xdigit:]]\\{6,6\\}" .
            (0 (put-text-property
                (match-beginning 0)
                (match-end 0)
                'face (list :background (match-string-no-properties 0)))))
 
-          ("#[abcdef[:digit:]]\\{3,3\\};" .
+          ("#[[:xdigit:]]\\{3,3\\};" .
            (0 (put-text-property
                (match-beginning 0)
                (match-end 0)
