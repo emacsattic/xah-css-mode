@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.12
+;; Version: 2.4.13
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -106,7 +106,7 @@ Version 2015-06-11"
 
 (defun xah-css-hex-color-to-hsl ()
   "Convert color spec under cursor from “#rrggbb” to CSS HSL format.
- ⁖ #ffefd5 ⇒ hsl(37,100%,91%)
+ e.g. #ffefd5 ⇒ hsl(37,100%,91%)
 URL `http://ergoemacs.org/emacs/elisp_convert_rgb_hsl_color.html'
 Version 2016-07-19"
   (interactive)
@@ -442,6 +442,7 @@ Version 2016-10-02"
 "min-width"
 "opacity"
 "orphans"
+"outline"
 "overflow"
 "padding"
 "padding-bottom"
@@ -564,7 +565,9 @@ Version 2016-10-02"
 
 (defvar xah-css-unit-names nil "List of CSS unite names.")
 (setq xah-css-unit-names
- '("px" "pt" "pc" "cm" "mm" "in" "em" "rem" "ex" "%" "deg") )
+ '("px" "pt" "pc" "cm" "mm" "in" "em" "rem" "ex" "%" "deg"
+"ch"
+) )
 
 (defvar xah-css-value-kwds nil "List of CSS value names")
 (setq
@@ -779,7 +782,9 @@ This uses `ido-mode' user interface for completion."
           (,cssPropertieNames . font-lock-variable-name-face )
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-constant-face)
-          (,cssUnitNames . font-lock-type-face)
+
+          (,(concat "[0-9]" "\\(" cssUnitNames "\\)") . (1 font-lock-type-face))
+
           (,cssMedia . font-lock-builtin-face)
 
           ("#[[:xdigit:]]\\{6,6\\}" .
@@ -948,6 +953,10 @@ Version 2016-10-24"
 
 (define-abbrev-table 'xah-css-mode-abbrev-table
   '(
+
+    ("fs" "font-size: " xah-css--ahf)
+    ("ff" "font-family: " xah-css--ahf)
+    ("fw" "font-weight: bold; " xah-css--ahf)
 
     ("bgc" "background-color" xah-css--ahf)
     ("rgb" "rgb(▮)" xah-css--ahf)
