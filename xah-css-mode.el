@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.13
+;; Version: 2.4.14
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -411,6 +411,7 @@ Version 2016-10-02"
 "break-inside"
 "clear"
 "color"
+"column-count"
 "content"
 "counter-increment"
 "counter-reset"
@@ -670,6 +671,8 @@ Version 2016-10-02"
 "wrap"
 "x-large"
 "xx-large"
+
+"inset"
 
    ) )
 
