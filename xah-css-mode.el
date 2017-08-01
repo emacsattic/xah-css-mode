@@ -1040,7 +1040,7 @@ Version 2016-10-24"
 
 
 ;;;###autoload
-(define-derived-mode xah-css-mode prog-mode "∑CSS"
+(define-derived-mode xah-css-mode prog-mode "∑css"
   "A major mode for CSS.
 
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
