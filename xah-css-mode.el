@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2016 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.4.15
+;; Version: 2.4.16
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1040,7 +1040,7 @@ Version 2016-10-24"
 
 
 ;;;###autoload
-(define-derived-mode xah-css-mode prog-mode "ξCSS"
+(define-derived-mode xah-css-mode prog-mode "∑CSS"
   "A major mode for CSS.
 
 URL `http://ergoemacs.org/emacs/xah-css-mode.html'
