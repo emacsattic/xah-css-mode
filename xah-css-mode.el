@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.5.20170820
+;; Version: 2.6.20170821
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -366,6 +366,8 @@ Version 2016-10-02"
 "background-image"
 "background-origin"
 "background-position"
+"background-position-x"
+"background-position-y"
 "background-repeat"
 "background-size"
 "border"
@@ -486,6 +488,7 @@ Version 2016-10-02"
 "transition-timing-function"
 "unicode-bidi"
 "vertical-align"
+"visibility"
 "white-space"
 "widows"
 "width"
@@ -575,41 +578,49 @@ Version 2016-10-02"
  xah-css-value-kwds
  '(
 
-"initial"
-"circle"
-"ellipse"
-"at"
 "!important"
 "absolute"
 "alpha"
+"at"
 "auto"
 "avoid"
+"blink"
 "block"
 "bold"
 "both"
 "bottom"
 "break-word"
+"capitalize"
 "center"
+"circle"
 "collapse"
 "dashed"
 "dotted"
+"double"
+"ellipse"
 "embed"
 "fixed"
 "flex"
 "flex-start"
 "flex-wrap"
 "grid"
+"groove"
 "help"
 "hidden"
 "hsl"
 "hsla"
 "inherit"
+"initial"
 "inline"
 "inline-block"
+"inset"
 "italic"
+"justify"
 "large"
 "left"
+"line-through"
 "linear-gradient"
+"lowercase"
 "ltr"
 "middle"
 "monospace"
@@ -617,11 +628,18 @@ Version 2016-10-02"
 "none"
 "normal"
 "nowrap"
+"oblique"
+"outset"
+"overline"
 "pointer"
 "radial-gradient"
 "relative"
+"repeat"
+"repeat-x"
+"repeat-y"
 "rgb"
 "rgba"
+"ridge"
 "right"
 "rotate"
 "rotate3d"
@@ -654,8 +672,8 @@ Version 2016-10-02"
 "table-header-group"
 "table-row"
 "table-row-group"
-"thin"
 "thick"
+"thin"
 "top"
 "translate"
 "translate3d"
@@ -664,15 +682,12 @@ Version 2016-10-02"
 "translateZ"
 "transparent"
 "underline"
-"overline"
-"line-through"
-"blink"
+"uppercase"
 "url"
+"visible"
 "wrap"
 "x-large"
 "xx-large"
-
-"inset"
 
    ) )
 
@@ -957,13 +972,53 @@ Version 2016-10-24"
 (define-abbrev-table 'xah-css-mode-abbrev-table
   '(
 
-    ("fs" "font-size: " xah-css--ahf)
-    ("ff" "font-family: " xah-css--ahf)
-    ("fw" "font-weight: bold; " xah-css--ahf)
+    ("bbc" "border-bottom-color" xah-css--ahf)
+    ("bbs" "border-bottom-style" xah-css--ahf)
+    ("bbw" "border-bottom-width" xah-css--ahf)
+    ("bc" "background-color" xah-css--ahf)
+    ("bi" "background-image" xah-css--ahf)
+    ("blc" "border-left-color" xah-css--ahf)
+    ("bls" "border-left-style" xah-css--ahf)
+    ("blw" "border-left-width" xah-css--ahf)
+    ("bpx" "background-position-x" xah-css--ahf)
+    ("bpy" "background-position-y" xah-css--ahf)
+    ("br" "border-radius: 1rem;" xah-css--ahf)
+    ("brc" "border-right-color" xah-css--ahf)
+    ("brs" "border-right-style" xah-css--ahf)
+    ("brw" "border-right-width" xah-css--ahf)
+    ("bs" "background-size" xah-css--ahf)
+    ("btc" "border-top-color" xah-css--ahf)
+    ("bts" "border-top-style" xah-css--ahf)
+    ("btw" "border-top-width" xah-css--ahf)
+    ("c" "color" xah-css--ahf)
+    ("d" "display" xah-css--ahf)
+    ("ff" "font-family" xah-css--ahf)
+    ("fs" "font-size" xah-css--ahf)
+    ("fw" "font-weight" xah-css--ahf)
+    ("h" "height" xah-css--ahf)
+    ("lh" "line-height" xah-css--ahf)
+    ("lst" "list-style-type" xah-css--ahf)
+    ("mb" "margin-bottom" xah-css--ahf)
+    ("ml" "margin-left" xah-css--ahf)
+    ("mr" "margin-right" xah-css--ahf)
+    ("mt" "margin-top" xah-css--ahf)
+    ("p" "position" xah-css--ahf)
+    ("pb" "padding-bottom" xah-css--ahf)
+    ("pl" "padding-left" xah-css--ahf)
+    ("pr" "padding-right" xah-css--ahf)
+    ("pt" "padding-top" xah-css--ahf)
+    ("ta" "text-align" xah-css--ahf)
+    ("v" "visibility" xah-css--ahf)
+    ("va" "vertical-align" xah-css--ahf)
+    ("w" "width" xah-css--ahf)
+    ("zi" "z-index" xah-css--ahf)
 
-    ("bgc" "background-color" xah-css--ahf)
+    ("border-radius" "border-radius: 1rem;" xah-css--ahf)
+    ("border" "border: solid thin gray;" xah-css--ahf)
+
     ("rgb" "rgb(▮)" xah-css--ahf)
     ("rgba" "rgba(▮)" xah-css--ahf)
+
     ("rotate" "rotate(▮9deg)" xah-css--ahf)
     ("rotate3d" "rotate3d(▮)" xah-css--ahf)
     ("rotateX" "rotateX(▮)" xah-css--ahf)
@@ -1003,7 +1058,50 @@ Version 2016-10-24"
     ("zpurple" "#800080" xah-css--ahf)
     ("zorange" "#ffa500" xah-css--ahf)
 
-)
+    ("font-size" "font-size: 2rem;" xah-css--ahf)
+    ("width" "width: 200px;" xah-css--ahf)
+    ("color" "color: red;" xah-css--ahf)
+    ("margin-top" "margin-top: 1rem;" xah-css--ahf)
+    ("margin-left" "margin-left: 1rem;" xah-css--ahf)
+    ("margin-bottom" "margin-bottom: 1rem;" xah-css--ahf)
+    ("margin-right" "margin-right: 1rem;" xah-css--ahf)
+    ("height" "height: 200px;" xah-css--ahf)
+    ("padding-top" "padding-top: 1rem;" xah-css--ahf)
+    ("padding-left" "padding-left: 1rem;" xah-css--ahf)
+    ("padding-bottom" "padding-bottom: 1rem;" xah-css--ahf)
+    ("padding-right" "padding-right: 1rem;" xah-css--ahf)
+    ("display" "display: inline-block;" xah-css--ahf)
+    ("background-color" "background-color: black;" xah-css--ahf)
+    ("text-align" "text-align: left right center justify;" xah-css--ahf)
+    ("position" "position: static absolute fixed relative initial inherit;" xah-css--ahf)
+    ("font-weight" "font-weight: normal bold;" xah-css--ahf)
+    ("line-height" "line-height: 1.5;" xah-css--ahf)
+    ("font-family" "font-family: \"Arial\", \"Liberation Sans\", sans-serif;" xah-css--ahf)
+    ("float" "float: none left right initial inherit;" xah-css--ahf)
+    ("top" "top: 99px;" xah-css--ahf)
+    ("border-bottom-style" "border-bottom-style: none hidden dotted dashed solid double groove ridge inset outset inherit initial unset;" xah-css--ahf)
+    ("border-bottom-width" "border-bottom-width: 2px;" xah-css--ahf)
+    ("left" "left: 99px;" xah-css--ahf)
+    ("border-top-width" "border-top-width: 3px;" xah-css--ahf)
+    ("border-top-style" "border-top-style: none hidden dotted dashed solid double groove ridge inset outset inherit initial unset;" xah-css--ahf)
+    ("border-bottom-color" "border-bottom-color: blue;" xah-css--ahf)
+    ("background-image" "background-image: url(\"[url]\");" xah-css--ahf)
+    ("clear" "clear: both left right none initial inherit;" xah-css--ahf)
+    ("border-top-color" "border-top-color: red;" xah-css--ahf)
+    ("border-left-width" "border-left-width: 3px;" xah-css--ahf)
+    ("border-left-style" "border-left-style: none hidden dotted dashed solid double groove ridge inset outset inherit initial unset;" xah-css--ahf)
+    ("z-index" "z-index: 53475;" xah-css--ahf)
+    ("border-right-width" "border-right-width: 3px;" xah-css--ahf)
+    ("border-right-style" "border-right-style: 3px;" xah-css--ahf)
+    ("vertical-align" "vertical-align: 3px;" xah-css--ahf)
+    ("background-position-x" "background-position-x: 9px;" xah-css--ahf)
+    ("background-position-y" "background-position-y: 9px;" xah-css--ahf)
+    ("border-left-color" "border-left-color: red;" xah-css--ahf)
+    ("border-right-color" "border-right-color: red;" xah-css--ahf)
+    ("cursor" "cursor: pointer;" xah-css--ahf)
+    ("visibility" "visibility: hidden visible;" xah-css--ahf)
+    ("list-style-type" "list-style-type: disc square circle decimal lower-roman upper-roman lower-alpha upper-alpha;" xah-css--ahf)
+    ("background-size" "background-size: 500px" xah-css--ahf))
 
   "abbrev table for `xah-css-mode'"
   )
