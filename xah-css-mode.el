@@ -7,13 +7,10 @@
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
+;; License: GPL v3
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
 
 ;; This file is not part of GNU Emacs.
-
-;;; License:
-
-;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 3.
 
 ;;; Commentary:
 
