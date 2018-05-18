@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.9.20180427061638
+;; Version: 2.9.20180518143656
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -932,8 +932,11 @@ emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
   "Return t if not in string or comment. Else nil.
 This is for abbrev table property `:enable-function'.
 Version 2016-10-24"
-  (let (($syntax-state (syntax-ppss)))
-    (not (or (nth 3 $syntax-state) (nth 4 $syntax-state)))))
+
+  ;; (let (($syntax-state (syntax-ppss)))
+  ;;     (not (or (nth 3 $syntax-state) (nth 4 $syntax-state))))
+  t
+  )
 
 (defun xah-css-expand-abbrev ()
   "Expand the symbol before cursor,
@@ -982,7 +985,6 @@ Version 2016-10-24"
 
 (define-abbrev-table 'xah-css-mode-abbrev-table
   '(
-
 
     ("b" "border;" xah-css--ahf)
     ("bbc" "border-bottom-color" xah-css--ahf)
