@@ -1,9 +1,9 @@
 ;;; xah-css-mode.el --- Major mode for editing CSS code. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2017 by Xah Lee
+;; Copyright © 2013-2019 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.9.20180629010654
+;; Version: 2.10.20190705004948
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1121,23 +1121,11 @@ Version 2016-10-24"
     ("width" "width: 200px;" xah-css--ahf)
     ("z-index" "z-index: 53475;" xah-css--ahf)
 
-    ("white3" "#ffffff" xah-css--ahf)
-    ("silver3" "#c0c0c0" xah-css--ahf)
-    ("gray3" "#808080" xah-css--ahf)
-    ("black3" "#000000" xah-css--ahf)
-    ("red3" "#ff0000" xah-css--ahf)
-    ("maroon3" "#800000" xah-css--ahf)
-    ("yellow3" "#ffff00" xah-css--ahf)
-    ("olive3" "#808000" xah-css--ahf)
-    ("lime3" "#00ff00" xah-css--ahf)
-    ("green3" "#008000" xah-css--ahf)
-    ("aqua3" "#00ffff" xah-css--ahf)
-    ("teal3" "#008080" xah-css--ahf)
-    ("blue3" "#0000ff" xah-css--ahf)
-    ("navy3" "#000080" xah-css--ahf)
-    ("fuchsia3" "#ff00ff" xah-css--ahf)
-    ("purple3" "#800080" xah-css--ahf)
-    ("orange3" "#ffa500" xah-css--ahf)
+    ("media" "@media all and (min-width: 1000px) {
+▮
+}
+
+" xah-css--ahf)
 
     ;;
     )
