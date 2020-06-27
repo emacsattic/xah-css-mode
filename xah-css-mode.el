@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.11.20200309092113
+;; Version: 2.12.20200627095142
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -373,6 +373,7 @@ Version 2016-10-02"
 "animation-name"
 "animation-play-state"
 "animation-timing-function"
+"anywhere"
 "attr"
 "backface-visibility"
 "background"
