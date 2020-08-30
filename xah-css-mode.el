@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20200627095142
+;; Version: 2.12.20200830055639
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -998,6 +998,7 @@ Version 2016-10-24"
   '(
 
     ("b" "border" xah-css--ahf)
+    ("bb" "border-bottom" xah-css--ahf)
     ("bbc" "border-bottom-color" xah-css--ahf)
     ("bbs" "border-bottom-style" xah-css--ahf)
     ("bbw" "border-bottom-width" xah-css--ahf)
@@ -1014,6 +1015,7 @@ Version 2016-10-24"
     ("brs" "border-right-style" xah-css--ahf)
     ("brw" "border-right-width" xah-css--ahf)
     ("bs" "background-size" xah-css--ahf)
+    ("bt" "border-top" xah-css--ahf)
     ("btc" "border-top-color" xah-css--ahf)
     ("bts" "border-top-style" xah-css--ahf)
     ("btw" "border-top-width" xah-css--ahf)
@@ -1054,6 +1056,7 @@ Version 2016-10-24"
     ("background-position-y" "background-position-y: 9px;" xah-css--ahf)
     ("background-size" "background-size: 500px;" xah-css--ahf)
     ("border" "border: solid thin gray;" xah-css--ahf)
+    ("border-bottom" "border-bottom: solid thin red;" xah-css--ahf)
     ("outline" "outline: solid thin gray;" xah-css--ahf)
     ("border-bottom-color" "border-bottom-color: blue;" xah-css--ahf)
     ("border-bottom-style" "border-bottom-style: none hidden dotted dashed solid double groove ridge inset outset inherit initial unset;" xah-css--ahf)
