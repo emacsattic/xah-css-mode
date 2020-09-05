@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20200830055639
+;; Version: 2.12.20200905151756
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1005,6 +1005,7 @@ Version 2016-10-24"
     ("bc" "background-color" xah-css--ahf)
     ("bgc" "background-color" xah-css--ahf)
     ("bi" "background-image" xah-css--ahf)
+    ("bl" "border-left" xah-css--ahf)
     ("blc" "border-left-color" xah-css--ahf)
     ("bls" "border-left-style" xah-css--ahf)
     ("blw" "border-left-width" xah-css--ahf)
@@ -1057,6 +1058,7 @@ Version 2016-10-24"
     ("background-size" "background-size: 500px;" xah-css--ahf)
     ("border" "border: solid thin gray;" xah-css--ahf)
     ("border-bottom" "border-bottom: solid thin red;" xah-css--ahf)
+    ("border-left" "border-left: solid thin blue;" xah-css--ahf)
     ("outline" "outline: solid thin gray;" xah-css--ahf)
     ("border-bottom-color" "border-bottom-color: blue;" xah-css--ahf)
     ("border-bottom-style" "border-bottom-style: none hidden dotted dashed solid double groove ridge inset outset inherit initial unset;" xah-css--ahf)
