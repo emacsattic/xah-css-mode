@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20200905151756
+;; Version: 2.12.20201207115058
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1044,6 +1044,7 @@ Version 2016-10-24"
     ("pt" "padding-top" xah-css--ahf)
     ("t" "top: 99px;" xah-css--ahf)
     ("ta" "text-align" xah-css--ahf)
+    ("td" "text-decoration" xah-css--ahf)
     ("ts" "text-shadow" xah-css--ahf)
     ("v" "visibility" xah-css--ahf)
     ("va" "vertical-align" xah-css--ahf)
@@ -1082,7 +1083,7 @@ Version 2016-10-24"
     ("float" "float: none left right initial inherit;" xah-css--ahf)
     ("font-family" "font-family: Arial, sans-serif;" xah-css--ahf)
     ("font-size" "font-size: 2rem;" xah-css--ahf)
-    ("font-weight" "font-weight: normal bold;" xah-css--ahf)
+    ("font-weight" "font-weight: bold;" xah-css--ahf)
     ("height" "height: 200px;" xah-css--ahf)
     ("left" "left: 99px;" xah-css--ahf)
     ("line-height" "line-height: 1.5;" xah-css--ahf)
@@ -1095,7 +1096,7 @@ Version 2016-10-24"
     ("max-height" "max-height: 17rem;" xah-css--ahf)
     ("max-width" "max-width: 17rem;" xah-css--ahf)
     ("opacity" "opacity: 1;" xah-css--ahf)
-    ("padding" "padding: 0.5rem;" xah-css--ahf)
+    ("padding" "padding: 8px;" xah-css--ahf)
     ("padding-bottom" "padding-bottom: 1rem;" xah-css--ahf)
     ("padding-left" "padding-left: 1rem;" xah-css--ahf)
     ("padding-right" "padding-right: 1rem;" xah-css--ahf)
@@ -1118,6 +1119,7 @@ Version 2016-10-24"
     ("skewY" "skewY(▮)" xah-css--ahf)
     ("steps" "steps(▮)" xah-css--ahf)
     ("text-align" "text-align: left right center justify;" xah-css--ahf)
+    ("text-decoration" "text-decoration: underline overline line-through none" xah-css--ahf)
     ("text-shadow" "text-shadow: 3px 3px 3px grey" xah-css--ahf)
     ("top" "top: 99px;" xah-css--ahf)
     ("translate" "translate(▮px,▮px)" xah-css--ahf)
