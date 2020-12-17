@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20201207115058
+;; Version: 2.12.20201216180651
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -61,6 +61,7 @@
 (require 'newcomment)
 (require 'ido)
 (require 'lisp-mode) ; for indent-sexp. todo possibly write own customized for css
+(require 'xah-replace-pairs)
 
 (defvar xah-css-mode-hook nil "Standard hook for `xah-css-mode'")
 
@@ -162,71 +163,6 @@ Version 2016-07-19"
 
 ;;; functions
 
-(defun xah-css--replace-regexp-pairs-region (@begin @end pairs &optional fixedcase-p literal-p)
-  "Replace regex string find/replace PAIRS in region.
-
-@BEGIN @END are the region boundaries.
-
-PAIRS is
- [[regexStr1 replaceStr1] [regexStr2 replaceStr2] …]
-It can be list or vector, for the elements or the entire argument.
-
-The optional arguments FIXEDCASE-P and LITERAL-P is the same as in `replace-match'.
-
-Find strings case sensitivity depends on `case-fold-search'. You can set it locally, like this: (let ((case-fold-search nil)) …)"
-  (save-restriction
-      (narrow-to-region @begin @end)
-      (mapc
-       (lambda ($x)
-         (goto-char (point-min))
-         (while (search-forward-regexp (elt $x 0) (point-max) t)
-           (replace-match (elt $x 1) fixedcase-p literal-p)))
-       pairs)))
-
-(defun xah-css--replace-pairs-region (@begin @end pairs)
-  "Replace multiple PAIRS of find/replace strings in region @BEGIN @END.
-
-PAIRS is a sequence of pairs
- [[findStr1 replaceStr1] [findStr2 replaceStr2] …]
-It can be list or vector, for the elements or the entire argument.
-
-Find strings case sensitivity depends on `case-fold-search'. You can set it locally, like this: (let ((case-fold-search nil)) …)
-
-The replacement are literal and case sensitive.
-
-Once a subsring in the buffer is replaced, that part will not change again.  For example, if the buffer content is “abcd”, and the pairs are a → c and c → d, then, result is “cbdd”, not “dbdd”.
-
-Note: the region's text or any string in PAIRS is assumed to NOT contain any character from Unicode Private Use Area A. That is, U+F0000 to U+FFFFD. And, there are no more than 65534 pairs."
-  (let (
-        ($unicodePriveUseA #xf0000)
-        ($i 0)
-        ($tempMapPoints '()))
-    (progn
-      ;; generate a list of Unicode chars for intermediate replacement. These chars are in  Private Use Area.
-      (setq $i 0)
-      (while (< $i (length pairs))
-        (push (char-to-string (+ $unicodePriveUseA $i)) $tempMapPoints)
-        (setq $i (1+ $i))))
-    (save-excursion
-      (save-restriction
-        (narrow-to-region @begin @end)
-        (progn
-          ;; replace each find string by corresponding item in $tempMapPoints
-          (setq $i 0)
-          (while (< $i (length pairs))
-            (goto-char (point-min))
-            (while (search-forward (elt (elt pairs $i) 0) nil t)
-              (replace-match (elt $tempMapPoints $i) t t))
-            (setq $i (1+ $i))))
-        (progn
-          ;; replace each $tempMapPoints by corresponding replacement string
-          (setq $i 0)
-          (while (< $i (length pairs))
-            (goto-char (point-min))
-            (while (search-forward (elt $tempMapPoints $i) nil t)
-              (replace-match (elt (elt pairs $i) 1) t t))
-            (setq $i (1+ $i))))))))
-
 (defun xah-css-smart-newline ()
   "Insert a newline, maybe add a semicolon before.
 Version 2018-02-19"
@@ -283,26 +219,28 @@ Version 2017-12-15"
      (list (point-min) (point-max))))
   (save-restriction
     (narrow-to-region @begin @end)
-
-    (xah-css--replace-pairs-region
+    (xah-replace-pairs-region
      (point-min)
      (point-max)
      '(
        ["\n" " "]
        [" /* " "/*"]
        [" */ " "*/"]
-       [" {" "{"]
+       ["{" " {"]
        ["{ " "{"]
        ["; " ";"]
        [": " ":"]
-       [";}" "}"]
-       ["}" "}\n"]
+       [";;" ";"]
+       ;; ["}" ";}"] ; problem line
        ))
-    (xah-css--replace-regexp-pairs-region
+    (xah-replace-regexp-pairs-region
      (point-min)
      (point-max)
-     '(["  +" " "]
+     '(
        ["\t\t*" " "]
+       ["  +" " "]
+       ["} ?" "}\n"]
+       ["\n\n+" "\n"]
        ))))
 
 (defun xah-css-expand-to-multi-lines (&optional @begin @end)
@@ -318,7 +256,7 @@ Version 2016-10-02"
      (list (point-min) (point-max))))
   (save-restriction
     (narrow-to-region @begin @end)
-    (xah-css--replace-pairs-region
+    (xah-replace-pairs-region
      (point-min)
      (point-max)
      '(
@@ -328,7 +266,7 @@ Version 2016-10-02"
        ["{" "\n{\n"]
        ["}" "\n}\n"]
        ))
-    (xah-css--replace-regexp-pairs-region
+    (xah-replace-regexp-pairs-region
      (point-min)
      (point-max)
      '(
