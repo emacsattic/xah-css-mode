@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20201216180651
+;; Version: 2.12.20201218111802
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -212,36 +212,19 @@ If there's text selection, work on that region.
 Else, work on whole buffer.
 WARNING: not 99% robust. This command work by doing string replacement. Can get wrong if you have a string or comment. Worst will happen is whitespace gets inserted/removed in string or comment.
 URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
-Version 2017-12-15"
+Version 2020-12-18"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (point-min) (point-max))))
   (save-restriction
     (narrow-to-region @begin @end)
-    (xah-replace-pairs-region
-     (point-min)
-     (point-max)
-     '(
-       ["\n" " "]
-       [" /* " "/*"]
-       [" */ " "*/"]
-       ["{" " {"]
-       ["{ " "{"]
-       ["; " ";"]
-       [": " ":"]
-       [";;" ";"]
-       ;; ["}" ";}"] ; problem line
-       ))
-    (xah-replace-regexp-pairs-region
-     (point-min)
-     (point-max)
-     '(
-       ["\t\t*" " "]
-       ["  +" " "]
-       ["} ?" "}\n"]
-       ["\n\n+" "\n"]
-       ))))
+    (xah-replace-pairs-region (point-min) (point-max) '( ["\t" " "] ["\n" " "] ["{" " {"] ))
+    (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
+    (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
+    (xah-replace-pairs-region (point-min) (point-max) '( ["}" ";}"] [" ;" ";"] ))
+    (xah-replace-pairs-region (point-min) (point-max) '( [";;" ";"] ))
+    (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] ))))
 
 (defun xah-css-expand-to-multi-lines (&optional @begin @end)
   "Expand minified CSS code to multiple lines.
