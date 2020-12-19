@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.13.20201218163109
+;; Version: 2.13.20201218183101
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -228,7 +228,7 @@ Version 2020-12-18"
       (xah-replace-pairs-region (point-min) (point-max) '( ["\t" " "] ["\n" " "] ["{" " {"] ))
       (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
       (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
-      (xah-replace-pairs-region (point-min) (point-max) '( ["}" ";}"] [" ;" ";"] ["; " ";"] ))
+      (xah-replace-pairs-region (point-min) (point-max) '( [" ;" ";"] ["; " ";"] ))
       (xah-replace-pairs-region (point-min) (point-max) '( [";;" ";"] ))
       (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] )))))
 
