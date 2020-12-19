@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.12.20201218145757
+;; Version: 2.13.20201218163109
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -210,29 +210,41 @@ Version 2015-06-29"
   "Remove unnecessary whitespaces of CSS source code in region.
 If there's text selection, work on that region.
 Else, work on whole buffer.
-WARNING: not 99% robust. This command work by doing string replacement. Can get wrong if you have a string or comment. Worst will happen is whitespace gets inserted/removed in string or comment.
+WARNING: This command work by doing string replacement. Can get wrong if you have a string or comment. Worst will happen is whitespace gets inserted/removed in string or comment.
 URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
 Version 2020-12-18"
-  (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (point-min) (point-max))))
-  (save-restriction
-    (narrow-to-region @begin @end)
-    (xah-replace-pairs-region (point-min) (point-max) '( ["\t" " "] ["\n" " "] ["{" " {"] ))
-    (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
-    (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
-    (xah-replace-pairs-region (point-min) (point-max) '( ["}" ";}"] [" ;" ";"] ["; " ";"] ))
-    (xah-replace-pairs-region (point-min) (point-max) '( [";;" ";"] ))
-    (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] ))))
+  (interactive)
+  (let ($p1 $p2)
+    (if @begin
+        (setq $p1 @begin $p2 @end)
+      (if (use-region-p)
+          (setq $p1 (region-beginning) $p2 (region-end))
+        (when (search-backward "{" )
+          (setq $p1 (point))
+          (when (search-forward "}"))
+          (setq $p2 (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (xah-replace-pairs-region (point-min) (point-max) '( ["\t" " "] ["\n" " "] ["{" " {"] ))
+      (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
+      (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
+      (xah-replace-pairs-region (point-min) (point-max) '( ["}" ";}"] [" ;" ";"] ["; " ";"] ))
+      (xah-replace-pairs-region (point-min) (point-max) '( [";;" ";"] ))
+      (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] )))))
+
+(defun xah-css-compact-css-buffer ()
+  "Remove unnecessary whitespaces of CSS source code in buffer.
+See `xah-css-compact-css-region'.
+URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
+Version 2020-12-18"
+  (interactive)
+  (xah-css-compact-css-region (point-min) (point-max)))
 
 (defun xah-css-expand-to-multi-lines (&optional @begin @end)
   "Expand minified CSS code to multiple lines.
-If there's text selection, work on that region.
-Else, work on whole buffer.
-Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added.
-todo a proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
-Version 2016-10-02"
+Work on whole buffer or text selection.
+Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added. A proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
+Version 2016-10-02 2020-12-18"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -253,7 +265,7 @@ Version 2016-10-02"
      (point-min)
      (point-max)
      '(
-       ["\n+" "\n"]
+       ["\n\n+" "\n"]
        ))))
 
 
@@ -1087,6 +1099,7 @@ Version 2016-10-24"
   (define-key xah-css-mode-no-chord-map (kbd "r") 'xah-css-insert-random-color-hsl)
   (define-key xah-css-mode-no-chord-map (kbd "c") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-mode-no-chord-map (kbd "p") 'xah-css-compact-css-region)
+  (define-key xah-css-mode-no-chord-map (kbd ".") 'xah-css-compact-css-buffer)
   (define-key xah-css-mode-no-chord-map (kbd "e") 'xah-css-expand-to-multi-lines)
   (define-key xah-css-mode-no-chord-map (kbd "u") 'xah-css-complete-symbol)
 
