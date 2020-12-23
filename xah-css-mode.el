@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.13.20201218183101
+;; Version: 2.13.20201223133308
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -208,11 +208,10 @@ Version 2015-06-29"
 
 (defun xah-css-compact-css-region (&optional @begin @end)
   "Remove unnecessary whitespaces of CSS source code in region.
-If there's text selection, work on that region.
-Else, work on whole buffer.
-WARNING: This command work by doing string replacement. Can get wrong if you have a string or comment. Worst will happen is whitespace gets inserted/removed in string or comment.
+Works on text selection or the {} block cursor is in, or the {} block before cursor.
+Note: this command only add/remove whitespaces.
 URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
-Version 2020-12-18"
+Version 2020-12-23"
   (interactive)
   (let ($p1 $p2)
     (if @begin
@@ -229,7 +228,6 @@ Version 2020-12-18"
       (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
       (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
       (xah-replace-pairs-region (point-min) (point-max) '( [" ;" ";"] ["; " ";"] ))
-      (xah-replace-pairs-region (point-min) (point-max) '( [";;" ";"] ))
       (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] )))))
 
 (defun xah-css-compact-css-buffer ()
@@ -242,31 +240,37 @@ Version 2020-12-18"
 
 (defun xah-css-expand-to-multi-lines (&optional @begin @end)
   "Expand minified CSS code to multiple lines.
-Work on whole buffer or text selection.
-Warning: if you have string and the string contains curly brackets {} semicolon ; and CSS comment delimitors, they may be changed with extra space added. A proper solution is to check first if it's in string before transform. But may not worth it, since its rare to have string in css.
-Version 2016-10-02 2020-12-18"
-  (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (point-min) (point-max))))
-  (save-restriction
-    (narrow-to-region @begin @end)
-    (xah-replace-pairs-region
-     (point-min)
-     (point-max)
-     '(
-       [";" ";\n"]
-       ["/* " "\n/*"]
-       ["*/" "*/\n"]
-       ["{" "\n{\n"]
-       ["}" "\n}\n"]
-       ))
-    (xah-replace-regexp-pairs-region
-     (point-min)
-     (point-max)
-     '(
-       ["\n\n+" "\n"]
-       ))))
+Works on text selection or the {} block cursor is in, or before cursor.
+Note: this command only add/remove whitespaces.
+Version 2016-10-02 2020-12-23"
+  (interactive)
+  (let ($p1 $p2)
+    (if @begin
+        (setq $p1 @begin $p2 @end)
+      (if (use-region-p)
+          (setq $p1 (region-beginning) $p2 (region-end))
+        (when (search-backward "{" )
+          (setq $p1 (point))
+          (when (search-forward "}"))
+          (setq $p2 (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (xah-replace-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         [";" ";\n"]
+         ["/* " "\n/*"]
+         ["*/" "*/\n"]
+         ["{" "\n{\n"]
+         ["}" "\n}\n"]
+         ))
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         ["\n\n+" "\n"]
+         )))))
 
 
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
