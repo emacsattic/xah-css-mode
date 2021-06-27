@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.13.20201229002950
+;; Version: 2.14.20210626220521
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1093,24 +1093,16 @@ Version 2016-10-24"
 
 (progn
   (setq xah-css-mode-map (make-sparse-keymap))
+  (define-prefix-command 'xah-css-leader-map)
   (define-key xah-css-mode-map (kbd "TAB") 'xah-css-complete-or-indent)
-
   (define-key xah-css-mode-map (kbd "RET") 'xah-css-smart-newline)
-
-  (define-prefix-command 'xah-css-mode-no-chord-map)
-
-  ;; todo need to set these to also emacs's conventional major mode keys
-  (define-key xah-css-mode-no-chord-map (kbd "r") 'xah-css-insert-random-color-hsl)
-  (define-key xah-css-mode-no-chord-map (kbd "c") 'xah-css-hex-color-to-hsl)
-  (define-key xah-css-mode-no-chord-map (kbd "p") 'xah-css-compact-css-region)
-  (define-key xah-css-mode-no-chord-map (kbd ".") 'xah-css-compact-css-buffer)
-  (define-key xah-css-mode-no-chord-map (kbd "e") 'xah-css-expand-to-multi-lines)
-  (define-key xah-css-mode-no-chord-map (kbd "u") 'xah-css-complete-symbol)
-
-  ;  (define-key xah-css-mode-map [remap comment-dwim] 'xah-css-comment-dwim)
-
-  ;; define separate, so that user can override the lead key
-  (define-key xah-css-mode-map (kbd "C-c C-c") xah-css-mode-no-chord-map))
+  (define-key xah-css-mode-map (kbd "<f9>") xah-css-leader-map)
+  (define-key xah-css-leader-map (kbd "r") 'xah-css-insert-random-color-hsl)
+  (define-key xah-css-leader-map (kbd "c") 'xah-css-hex-color-to-hsl)
+  (define-key xah-css-leader-map (kbd "p") 'xah-css-compact-css-region)
+  (define-key xah-css-leader-map (kbd ".") 'xah-css-compact-css-buffer)
+  (define-key xah-css-leader-map (kbd "e") 'xah-css-expand-to-multi-lines)
+  (define-key xah-css-leader-map (kbd "u") 'xah-css-complete-symbol))
 
 
 
