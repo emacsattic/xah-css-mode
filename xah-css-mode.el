@@ -1,9 +1,9 @@
 ;;; xah-css-mode.el --- Major mode for editing CSS code. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2020 by Xah Lee
+;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.14.20210626220521
+;; Version: 2.14.20210721160845
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, convenience, css, color
@@ -1018,7 +1018,7 @@ Version 2016-10-24"
     ("display" "display:inline-block;" xah-css--ahf)
     ("first-letter" "first-letter {font-size:30px;}" xah-css--ahf)
     ("float" "float:none left right initial inherit;" xah-css--ahf)
-    ("font-family" "font-family:Arial, sans-serif;" xah-css--ahf)
+    ("font-family" "font-family:Arial, sans-serif;\nfont-family: Consolas, Menlo, monospace;" xah-css--ahf)
     ("font-size" "font-size:30px;" xah-css--ahf)
     ("font-weight" "font-weight:bold;" xah-css--ahf)
     ("height" "height:200px;" xah-css--ahf)
