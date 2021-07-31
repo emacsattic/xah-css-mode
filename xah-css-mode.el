@@ -3,9 +3,9 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 2.14.20210721160845
+;; Version: 2.15.20210731142838
 ;; Created: 18 April 2013
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
 ;; License: GPL v3
 ;; Homepage:  http://ergoemacs.org/emacs/xah-css-mode.html
@@ -1121,9 +1121,7 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
   (setq-local comment-end-skip "[ \t]*\\*+/")
 
   (make-local-variable 'abbrev-expand-function)
-  (if (version< emacs-version "24.4")
-      (add-hook 'abbrev-expand-functions 'xah-css-expand-abbrev nil t)
-    (setq abbrev-expand-function 'xah-css-expand-abbrev))
+  (setq abbrev-expand-function 'xah-css-expand-abbrev)
 
   (abbrev-mode 1)
 
