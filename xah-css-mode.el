@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.0.20210819004150
+;; Version: 3.1.20210823181037
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -754,7 +754,7 @@ Version 2016-10-24"
   (define-prefix-command 'xah-css-leader-map)
   (define-key xah-css-mode-map (kbd "TAB") 'xah-css-complete-or-indent)
   (define-key xah-css-mode-map (kbd "RET") 'xah-css-smart-newline)
-  (define-key xah-css-mode-map (kbd "<f9>") xah-css-leader-map)
+  (define-key xah-css-mode-map (if (boundp 'xahemacs-major-mode-leader-key) xahemacs-major-mode-leader-key (kbd "<f9>")) xah-css-leader-map)
   (define-key xah-css-leader-map (kbd "r") 'xah-css-insert-random-color-hsl)
   (define-key xah-css-leader-map (kbd "x") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-leader-map (kbd "c") 'xah-css-format-compact)
