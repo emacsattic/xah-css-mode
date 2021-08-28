@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.1.20210823181037
+;; Version: 3.3.20210828120226
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -92,14 +92,14 @@ Version 2016-07-19"
       (progn
         (user-error "The current word 「%s」 is not of the form #rrggbb." $currentWord)))))
 
-(defun xah-css-hex-to-hsl-color (@hex-str)
-  "Convert @hex-str color to CSS HSL format.
+(defun xah-css-hex-to-hsl-color (HexStr)
+  "Convert HexStr color to CSS HSL format.
 Return a string. Example:  \"ffefd5\" ⇒ \"hsl(37,100%,91%)\"
 Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2016-07-19"
   (let* (
-         ($colorVec (xah-css-convert-color-hex-to-vec @hex-str))
+         ($colorVec (xah-css-convert-color-hex-to-vec HexStr))
          ($R (elt $colorVec 0))
          ($G (elt $colorVec 1))
          ($B (elt $colorVec 2))
@@ -109,8 +109,8 @@ Version 2016-07-19"
          ($L (elt $hsl 2)))
     (format "hsl(%d,%d%%,%d%%)" (* $H 360) (* $S 100) (* $L 100))))
 
-(defun xah-css-convert-color-hex-to-vec (@rrggbb)
-  "Convert color @rrggbb from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
+(defun xah-css-convert-color-hex-to-vec (Rrggbb)
+  "Convert color Rrggbb from “\"rrggbb\"” string to a elisp vector [r g b], where the values are from 0 to 1.
 Example:
  (xah-css-convert-color-hex-to-vec \"00ffcc\") ⇒ [0.0 1.0 0.8]
 
@@ -118,17 +118,17 @@ Note: The input string must NOT start with “#”.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2016-07-19"
   (vector
-   (xah-css-normalize-number-scale (string-to-number (substring @rrggbb 0 2) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring @rrggbb 2 4) 16) 255)
-   (xah-css-normalize-number-scale (string-to-number (substring @rrggbb 4) 16) 255)))
+   (xah-css-normalize-number-scale (string-to-number (substring Rrggbb 0 2) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring Rrggbb 2 4) 16) 255)
+   (xah-css-normalize-number-scale (string-to-number (substring Rrggbb 4) 16) 255)))
 
-(defun xah-css-normalize-number-scale (@val @range-max)
-  "Scale @val from range [0, @range-max] to [0, 1]
+(defun xah-css-normalize-number-scale (Val RangeMax)
+  "Scale Val from range [0, RangeMax] to [0, 1]
 The arguments can be int or float.
 Return value is float.
 URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2016-07-19"
-  (/ (float @val) (float @range-max)))
+  (/ (float Val) (float RangeMax)))
 
 
 ;;; functions
@@ -149,7 +149,7 @@ Version 2018-02-19"
       (forward-char )
       (newline))))
 
-(defun xah-css-format-compact (&optional @begin @end)
+(defun xah-css-format-compact (&optional Begin End)
   "Reformat CSS source code in a compact style.
 Works on text selection or the {} block cursor is in, or the {} block before cursor.
 Note: this command only add/remove whitespaces.
@@ -157,8 +157,8 @@ URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
 Version 2020-12-23 2021-08-03"
   (interactive)
   (let ($p1 $p2)
-    (if @begin
-        (setq $p1 @begin $p2 @end)
+    (if Begin
+        (setq $p1 Begin $p2 End)
       (if (use-region-p)
           (setq $p1 (region-beginning) $p2 (region-end))
         (when (search-backward "{" )
@@ -181,15 +181,15 @@ Version 2020-12-18 2021-08-03"
   (interactive)
   (xah-css-format-compact (point-min) (point-max)))
 
-(defun xah-css-format-to-multi-lines (&optional @begin @end)
+(defun xah-css-format-to-multi-lines (&optional Begin End)
   "Expand minified CSS code to multiple lines.
 Works on text selection or the {} block cursor is in, or before cursor.
 Note: this command only add/remove whitespaces.
 Version 2016-10-02 2021-08-03"
   (interactive)
   (let ($p1 $p2)
-    (if @begin
-        (setq $p1 @begin $p2 @end)
+    (if Begin
+        (setq $p1 Begin $p2 End)
       (if (use-region-p)
           (setq $p1 (region-beginning) $p2 (region-end))
         (when (search-backward "{" )
@@ -401,26 +401,25 @@ This uses `ido-mode' user interface for completion."
 ;; syntax coloring related
 
 (setq xah-css-font-lock-keywords
-      (let (
-            (cssPseudoSelectorNames (regexp-opt xah-css-pseudo-selector-names ))
-            (htmlTagNames (regexp-opt xah-css-html-tag-names 'symbols))
-            (cssPropertieNames (regexp-opt xah-css-property-names 'symbols ))
-            (cssValueNames (regexp-opt xah-css-value-kwds 'symbols))
-            (cssColorNames (regexp-opt xah-css-color-names 'symbols))
-            (cssUnitNames (regexp-opt xah-css-unit-names ))
-            (cssMedia (regexp-opt xah-css-media-keywords )))
+      (let ( )
         `(
           ("#[-_a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-id-selector)
           ("\\.[a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-class-selector)
-          (,cssPseudoSelectorNames . font-lock-preprocessor-face)
-          (,htmlTagNames . font-lock-function-name-face)
-          (,cssPropertieNames . font-lock-variable-name-face )
-          (,cssValueNames . font-lock-keyword-face)
-          (,cssColorNames . font-lock-constant-face)
+          (,(regexp-opt xah-css-pseudo-selector-names )
+           . font-lock-preprocessor-face)
+          (,(regexp-opt xah-css-html-tag-names 'symbols)
+           . font-lock-function-name-face)
+          (,(regexp-opt xah-css-property-names 'symbols )
+           . font-lock-variable-name-face )
+          (,(regexp-opt xah-css-value-kwds 'symbols)
+           . font-lock-keyword-face)
+          (,(regexp-opt xah-css-color-names 'symbols)
+           . font-lock-constant-face)
+          (,(format "[0-9]+\\(%s\\)" (regexp-opt xah-css-unit-names ))
+           . (1 font-lock-type-face))
+          (,(regexp-opt xah-css-media-keywords ) . font-lock-builtin-face)
 
-          (,(format "[0-9]+\\(%s\\)" cssUnitNames)  . (1 font-lock-type-face))
-
-          (,cssMedia . font-lock-builtin-face)
+          ("--[A-Za-z][A-Za-z0-9]+" . font-lock-warning-face)
 
           ("#[[:xdigit:]]\\{6,6\\}" .
            (0 (put-text-property
@@ -570,14 +569,14 @@ Version 2016-10-24"
             $abrSymbol)
         nil))))
 
-(defun xah-css--abbrev-position-cursor (&optional @pos)
+(defun xah-css--abbrev-position-cursor (&optional Pos)
   "Move cursor back to ▮ if exist, else put at end.
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (let (($found-p (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t )))
-    (when $found-p (forward-char ))
-    $found-p
+  (let (($foundQ (search-backward "▮" (if Pos Pos (max (point-min) (- (point) 100))) t )))
+    (when $foundQ (forward-char ))
+    $foundQ
     ))
 
 (defun xah-css--ahf ()
@@ -773,7 +772,6 @@ URL `http://ergoemacs.org/emacs/xah-css-mode.html'
 
 \\{xah-css-mode-map}"
   (setq font-lock-defaults '((xah-css-font-lock-keywords)))
-
   (setq-local comment-start "/*")
   (setq-local comment-start-skip "/\\*+[ \t]*")
   (setq-local comment-end "*/")
