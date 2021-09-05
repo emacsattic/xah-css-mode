@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.3.20210828120226
+;; Version: 3.4.20210905105624
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -24,7 +24,7 @@
 ;; (add-to-list 'load-path "~/.emacs.d/lisp/")
 ;; (autoload 'xah-css-mode "xah-css-mode" "css major mode." t)
 
-
+;; HHH___________________________________________________________________
 ;;; Code:
 
 (require 'color) ; part of emacs 24.1
@@ -35,7 +35,7 @@
 
 (defvar xah-css-mode-hook nil "Standard hook for `xah-css-mode'")
 
-
+;; HHH___________________________________________________________________
 
 (defface xah-css-id-selector
   '(
@@ -130,7 +130,7 @@ URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
 Version 2016-07-19"
   (/ (float Val) (float RangeMax)))
 
-
+;; HHH___________________________________________________________________
 ;;; functions
 
 (defun xah-css-smart-newline ()
@@ -154,24 +154,90 @@ Version 2018-02-19"
 Works on text selection or the {} block cursor is in, or the {} block before cursor.
 Note: this command only add/remove whitespaces.
 URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
-Version 2020-12-23 2021-08-03"
+Version 2020-12-23 2021-08-03 2021-09-05"
   (interactive)
   (let ($p1 $p2)
     (if Begin
         (setq $p1 Begin $p2 End)
       (if (use-region-p)
           (setq $p1 (region-beginning) $p2 (region-end))
-        (when (search-backward "{" )
+        (when (search-backward "{")
           (setq $p1 (point))
           (when (search-forward "}"))
           (setq $p2 (point)))))
     (save-restriction
       (narrow-to-region $p1 $p2)
-      (xah-replace-pairs-region (point-min) (point-max) '( ["\t" " "] ["\n" " "] ["{" " {"] ))
-      (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["  +" " "]  ))
-      (xah-replace-pairs-region (point-min) (point-max) '( [" }" "}"] ))
-      (xah-replace-pairs-region (point-min) (point-max) '( [" ;" ";"] ["; " ";"] ))
-      (xah-replace-regexp-pairs-region (point-min) (point-max) '( ["\n\n+" "\n"] ["} ?" "}\n"] )))))
+      (xah-replace-pairs-region
+       (point-min)
+       (point-max)
+       '(["\t" " "]
+         ["\n" " "]
+         ))
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '([" +" " "]))
+      (xah-replace-pairs-region
+       (point-min)
+       (point-max)
+       '([" }" "}"]))
+      (xah-replace-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         [" :" ":"]
+         [": " ":"]
+         [" ;" ";"]
+         ["; " ";"]))
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '(["\n\n+" "\n"]
+         ["} ?" "}\n"])))))
+
+(defun xah-css-format-to-multi-lines (&optional Begin End)
+  "Expand minified CSS code to multiple lines.
+Works on text selection or the {} block cursor is in, or before cursor.
+Note: this command only add/remove whitespaces.
+Version 2016-10-02 2021-08-03 2021-09-05"
+  (interactive)
+  (let ($p1 $p2)
+    (if Begin
+        (setq $p1 Begin $p2 End)
+      (if (region-active-p)
+          (setq $p1 (region-beginning) $p2 (region-end))
+        (when (search-backward "{")
+          (setq $p1 (point))
+          (when (search-forward "}"))
+          (setq $p2 (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         [" +" " "]
+         ["/n/n+" "\n"]
+         ))
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         [" *; *" ";\n"]
+         ["/\\* " "\n/\\*"]
+         ["\\*/" "\\*/\n"]
+         ["{ *" "{\n"]
+         [" *} *" "}\n"]
+         ))
+      (xah-replace-regexp-pairs-region
+       (point-min)
+       (point-max)
+       '(
+         ["\n\n+" "\n"]
+         ))
+      (goto-char (point-max))
+      (when (eq (char-before) 10)
+        (delete-char -1)))))
 
 (defun xah-css-format-compact-buffer ()
   "Reformat CSS code to a compact style, in whole buffer.
@@ -181,47 +247,13 @@ Version 2020-12-18 2021-08-03"
   (interactive)
   (xah-css-format-compact (point-min) (point-max)))
 
-(defun xah-css-format-to-multi-lines (&optional Begin End)
-  "Expand minified CSS code to multiple lines.
-Works on text selection or the {} block cursor is in, or before cursor.
-Note: this command only add/remove whitespaces.
-Version 2016-10-02 2021-08-03"
-  (interactive)
-  (let ($p1 $p2)
-    (if Begin
-        (setq $p1 Begin $p2 End)
-      (if (use-region-p)
-          (setq $p1 (region-beginning) $p2 (region-end))
-        (when (search-backward "{" )
-          (setq $p1 (point))
-          (when (search-forward "}"))
-          (setq $p2 (point)))))
-    (save-restriction
-      (narrow-to-region $p1 $p2)
-      (xah-replace-pairs-region
-       (point-min)
-       (point-max)
-       '(
-         [";" ";\n"]
-         ["/* " "\n/*"]
-         ["*/" "*/\n"]
-         ["{" "\n{\n"]
-         ["}" "\n}\n"]
-         ))
-      (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
-       '(
-         ["\n\n+" "\n"]
-         )))))
-
 (defun xah-css-format-to-multi-lines-buffer ()
   "Expand minified CSS code to multiple lines for whole buffer.
 Version 2021-08-03"
   (interactive)
   (xah-css-format-to-multi-lines (point-min) (point-max)))
 
-
+;; HHH___________________________________________________________________
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
 (setq xah-css-html-tag-names
 
@@ -350,7 +382,7 @@ Version 2021-08-03"
                                      xah-css-value-kwds
                                      ))
 
-
+;; HHH___________________________________________________________________
 ;; completion
 
 (defun xah-css-complete-symbol ()
@@ -372,7 +404,7 @@ This uses `ido-mode' user interface for completion."
     (delete-region $p1 $p2)
     (insert $result-sym)))
 
-
+;; HHH___________________________________________________________________
 ;; syntax table
 (defvar xah-css-mode-syntax-table nil "Syntax table for `xah-css-mode'.")
 (setq xah-css-mode-syntax-table
@@ -397,7 +429,7 @@ This uses `ido-mode' user interface for completion."
         (modify-syntax-entry ?* ". 23" synTable)
         synTable))
 
-
+;; HHH___________________________________________________________________
 ;; syntax coloring related
 
 (setq xah-css-font-lock-keywords
@@ -462,7 +494,7 @@ This uses `ido-mode' user interface for completion."
 
           ("'[^']+'" . font-lock-string-face))))
 
-
+;; HHH___________________________________________________________________
 ;; indent/reformat related
 
 (defun xah-css-complete-or-indent ()
@@ -476,8 +508,8 @@ If char before point is letters and char after point is whitespace or punctuatio
   ;; space▮char → do indent
   ;; char▮space → do completion
   ;; char ▮char → do indent
-  (let ( ($syntax-state (syntax-ppss)))
-    (if (or (nth 3 $syntax-state) (nth 4 $syntax-state))
+  (let ( ($syntaxState (syntax-ppss)))
+    (if (or (nth 3 $syntaxState) (nth 4 $syntaxState))
         (xah-css-prettify-root-sexp)
       (if
           (and (looking-back "[-_a-zA-Z]" 1)
@@ -530,7 +562,7 @@ emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
       (up-list arg1 arg2 arg3)
     (up-list arg1)))
 
-
+;; HHH___________________________________________________________________
 ;; abbrev
 
 (defun xah-css-abbrev-enable-function ()
@@ -538,8 +570,8 @@ emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
 This is for abbrev table property `:enable-function'.
 Version 2016-10-24"
 
-  ;; (let (($syntax-state (syntax-ppss)))
-  ;;     (not (or (nth 3 $syntax-state) (nth 4 $syntax-state))))
+  ;; (let (($syntaxState (syntax-ppss)))
+  ;;     (not (or (nth 3 $syntaxState) (nth 4 $syntaxState))))
   t
   )
 
@@ -743,7 +775,7 @@ Version 2016-10-24"
 (abbrev-table-put xah-css-mode-abbrev-table :system t)
 (abbrev-table-put xah-css-mode-abbrev-table :enable-function 'xah-css-abbrev-enable-function)
 
-
+;; HHH___________________________________________________________________
 ;; keybinding
 
 (defvar xah-css-mode-map nil "Keybinding for `xah-css-mode'")
@@ -762,7 +794,7 @@ Version 2016-10-24"
   (define-key xah-css-leader-map (kbd "p") 'xah-css-format-to-multi-lines-buffer)
   (define-key xah-css-leader-map (kbd "u") 'xah-css-complete-symbol))
 
-
+;; HHH___________________________________________________________________
 
 ;;;###autoload
 (define-derived-mode xah-css-mode prog-mode "∑css"
