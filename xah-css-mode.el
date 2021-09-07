@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.4.20210905105624
+;; Version: 3.5.20210907071631
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -167,39 +167,27 @@ Version 2020-12-23 2021-08-03 2021-09-05"
           (setq $p2 (point)))))
     (save-restriction
       (narrow-to-region $p1 $p2)
-      (xah-replace-pairs-region
-       (point-min)
-       (point-max)
-       '(["\t" " "]
-         ["\n" " "]
-         ))
       (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
-       '([" +" " "]))
-      (xah-replace-pairs-region
-       (point-min)
-       (point-max)
-       '([" }" "}"]))
-      (xah-replace-pairs-region
        (point-min)
        (point-max)
        '(
+         ["\t" " "]
+         ["\n" " "]
+         [" +" " "]
+         [" }" "}"]
          [" :" ":"]
          [": " ":"]
          [" ;" ";"]
-         ["; " ";"]))
-      (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
-       '(["\n\n+" "\n"]
-         ["} ?" "}\n"])))))
+         ["; " ";"]
+         ["\n\n+" "\n"]
+         ["} ?" "}"]
+         )))))
 
-(defun xah-css-format-to-multi-lines (&optional Begin End)
+(defun xah-css-format-expand (&optional Begin End)
   "Expand minified CSS code to multiple lines.
 Works on text selection or the {} block cursor is in, or before cursor.
 Note: this command only add/remove whitespaces.
-Version 2016-10-02 2021-08-03 2021-09-05"
+Version 2016-10-02 2021-08-03 2021-09-07"
   (interactive)
   (let ($p1 $p2)
     (if Begin
@@ -213,26 +201,15 @@ Version 2016-10-02 2021-08-03 2021-09-05"
     (save-restriction
       (narrow-to-region $p1 $p2)
       (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
+       (point-min) (point-max)
        '(
          [" +" " "]
          ["/n/n+" "\n"]
-         ))
-      (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
-       '(
          [" *; *" ";\n"]
-         ["/\\* " "\n/\\*"]
-         ["\\*/" "\\*/\n"]
+         ["/\\*" "\n/*"]
+         ["\\*/" "*/\n"]
          ["{ *" "{\n"]
          [" *} *" "}\n"]
-         ))
-      (xah-replace-regexp-pairs-region
-       (point-min)
-       (point-max)
-       '(
          ["\n\n+" "\n"]
          ))
       (goto-char (point-max))
@@ -247,11 +224,20 @@ Version 2020-12-18 2021-08-03"
   (interactive)
   (xah-css-format-compact (point-min) (point-max)))
 
-(defun xah-css-format-to-multi-lines-buffer ()
+(defun xah-css-format-expand-buffer ()
   "Expand minified CSS code to multiple lines for whole buffer.
 Version 2021-08-03"
   (interactive)
-  (xah-css-format-to-multi-lines (point-min) (point-max)))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (xah-css-format-expand (point-min) (point-max))
+      (xah-replace-regexp-pairs-region
+       (point-min) (point-max)
+       '(
+         ["}" "}\n" ]
+         ["\n\n\n+" "\n\n"]
+         )))))
 
 ;; HHH___________________________________________________________________
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
@@ -790,8 +776,8 @@ Version 2016-10-24"
   (define-key xah-css-leader-map (kbd "x") 'xah-css-hex-color-to-hsl)
   (define-key xah-css-leader-map (kbd "c") 'xah-css-format-compact)
   (define-key xah-css-leader-map (kbd "g") 'xah-css-format-compact-buffer)
-  (define-key xah-css-leader-map (kbd ".") 'xah-css-format-to-multi-lines)
-  (define-key xah-css-leader-map (kbd "p") 'xah-css-format-to-multi-lines-buffer)
+  (define-key xah-css-leader-map (kbd "t") 'xah-css-format-expand)
+  (define-key xah-css-leader-map (kbd "h") 'xah-css-format-expand-buffer)
   (define-key xah-css-leader-map (kbd "u") 'xah-css-complete-symbol))
 
 ;; HHH___________________________________________________________________
