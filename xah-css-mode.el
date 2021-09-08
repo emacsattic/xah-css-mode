@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.5.20210907071631
+;; Version: 3.5.20210908091017
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -171,17 +171,30 @@ Version 2020-12-23 2021-08-03 2021-09-05"
        (point-min)
        (point-max)
        '(
-         ["\t" " "]
          ["\n" " "]
-         [" +" " "]
+         ["[ \t\n][ \t\n]+" " "]
          [" }" "}"]
          [" :" ":"]
-         [": " ":"]
          [" ;" ";"]
          ["; " ";"]
-         ["\n\n+" "\n"]
-         ["} ?" "}"]
+         ["} " "}"]
          )))))
+
+(defun xah-css-format-compact-buffer ()
+  "Reformat CSS code to a compact style, in whole buffer.
+Respect `narrow-to-region'.
+URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
+Version 2020-12-18 2021-09-07"
+  (interactive)
+  (save-excursion
+    (xah-css-format-compact (point-min) (point-max))
+    (xah-replace-pairs-region
+     (point-min) (point-max)
+     '(
+       [ "/*" "\n/*"]
+       ["*/" "*/\n" ]
+       ["}" "}\n"]
+       ))))
 
 (defun xah-css-format-expand (&optional Begin End)
   "Expand minified CSS code to multiple lines.
@@ -203,8 +216,7 @@ Version 2016-10-02 2021-08-03 2021-09-07"
       (xah-replace-regexp-pairs-region
        (point-min) (point-max)
        '(
-         [" +" " "]
-         ["/n/n+" "\n"]
+         ["  +" " "]
          [" *; *" ";\n"]
          ["/\\*" "\n/*"]
          ["\\*/" "*/\n"]
@@ -216,88 +228,345 @@ Version 2016-10-02 2021-08-03 2021-09-07"
       (when (eq (char-before) 10)
         (delete-char -1)))))
 
-(defun xah-css-format-compact-buffer ()
-  "Reformat CSS code to a compact style, in whole buffer.
-See `xah-css-format-compact'.
-URL `http://ergoemacs.org/emacs/elisp_css_compressor.html'
-Version 2020-12-18 2021-08-03"
-  (interactive)
-  (xah-css-format-compact (point-min) (point-max)))
-
 (defun xah-css-format-expand-buffer ()
   "Expand minified CSS code to multiple lines for whole buffer.
+Respect `narrow-to-region'.
 Version 2021-08-03"
   (interactive)
   (save-excursion
-    (save-restriction
-      (widen)
-      (xah-css-format-expand (point-min) (point-max))
-      (xah-replace-regexp-pairs-region
-       (point-min) (point-max)
-       '(
-         ["}" "}\n" ]
-         ["\n\n\n+" "\n\n"]
-         )))))
+    (xah-css-format-expand (point-min) (point-max))
+    (xah-replace-regexp-pairs-region
+     (point-min) (point-max)
+     '(
+       ["}" "}\n" ]
+       ["\n\n\n+" "\n\n"]
+       ))))
 
 ;; HHH___________________________________________________________________
 (defvar xah-css-html-tag-names nil "List of HTML5 tag names.")
 (setq xah-css-html-tag-names
-
-'( "a" "abbr" "address" "applet" "area" "article" "aside" "audio" "b" "base"
-"basefont" "bdi" "bdo" "blockquote" "body" "br" "button" "canvas" "caption"
-"cite" "code" "col" "colgroup" "command" "datalist" "dd" "del" "details"
-"dfn" "div" "dl" "doctype" "dt" "em" "embed" "fieldset" "figcaption" "figure"
-"footer" "form" "h1" "h2" "h3" "h4" "h5" "h6" "head" "header" "hgroup"
-"hr" "html" "i" "iframe" "img" "input" "ins" "kbd" "keygen" "label" "legend"
-"li" "link" "main" "map" "mark" "menu" "meta" "meter" "nav" "noscript"
-"object" "ol" "optgroup" "option" "output" "p" "param" "pre" "progress"
-"q" "rp" "rt" "ruby" "s" "samp" "script" "section" "select" "small" "source"
-"span" "strong" "style" "sub" "summary" "sup" "table" "tbody" "td" "textarea"
-"tfoot" "th" "thead" "time" "title" "tr" "u" "ul" "var" "video" "wbr" ))
+'(
+"a"
+"abbr"
+"address"
+"applet"
+"area"
+"article"
+"aside"
+"audio"
+"b"
+"base"
+"basefont"
+"bdi"
+"bdo"
+"blockquote"
+"body"
+"br"
+"button"
+"canvas"
+"caption"
+"cite"
+"code"
+"col"
+"colgroup"
+"command"
+"datalist"
+"dd"
+"del"
+"details"
+"dfn"
+"div"
+"dl"
+"doctype"
+"dt"
+"em"
+"embed"
+"fieldset"
+"figcaption"
+"figure"
+"footer"
+"form"
+"h1"
+"h2"
+"h3"
+"h4"
+"h5"
+"h6"
+"head"
+"header"
+"hgroup"
+"hr"
+"html"
+"i"
+"iframe"
+"img"
+"input"
+"ins"
+"kbd"
+"keygen"
+"label"
+"legend"
+"li"
+"link"
+"main"
+"map"
+"mark"
+"menu"
+"meta"
+"meter"
+"nav"
+"noscript"
+"object"
+"ol"
+"optgroup"
+"option"
+"output"
+"p"
+"param"
+"pre"
+"progress"
+"q"
+"rp"
+"rt"
+"ruby"
+"s"
+"samp"
+"script"
+"section"
+"select"
+"small"
+"source"
+"span"
+"strong"
+"style"
+"sub"
+"summary"
+"sup"
+"table"
+"tbody"
+"td"
+"textarea"
+"tfoot"
+"th"
+"thead"
+"time"
+"title"
+"tr"
+"u"
+"ul"
+"var"
+"video"
+"wbr"
+))
 
 (defvar xah-css-property-names nil "List of CSS property names.")
-(setq xah-css-property-names
-      '( "align-content" "align-items" "align-self" "animation" "animation-delay"
-         "animation-direction" "animation-duration" "animation-fill-mode" "animation-iteration-count"
-         "animation-name" "animation-play-state" "animation-timing-function" "anywhere"
-         "attr" "backface-visibility" "background" "background-attachment" "background-clip"
-         "background-color" "background-image" "background-origin" "background-position"
-         "background-position-x" "background-position-y" "background-repeat" "background-size"
-         "border" "border-bottom" "border-bottom-color" "border-bottom-left-radius"
-         "border-bottom-right-radius" "border-bottom-style" "border-bottom-width"
-         "border-collapse" "border-color" "border-image" "border-image-outset" "border-image-repeat"
-         "border-image-slice" "border-image-source" "border-image-width" "border-left"
-         "border-left-color" "border-left-style" "border-left-width" "border-radius"
-         "border-right" "border-right-color" "border-right-style" "border-right-width"
-         "border-spacing" "border-style" "border-top" "border-top-color" "border-top-left-radius"
-         "border-top-right-radius" "border-top-style" "border-top-width" "border-width"
-         "bottom" "bottom" "box-decoration-break" "box-shadow" "box-sizing" "break-after"
-         "break-before" "break-inside" "clear" "color" "column-count" "content"
-         "counter-increment" "counter-reset" "cursor" "direction" "display" "filter"
-         "float" "font" "font-family" "font-size" "font-style" "font-weight" "height"
-         "left" "letter-spacing" "line-height" "list-style" "list-style-image" "list-style-type"
-         "margin" "margin-bottom" "margin-left" "margin-right" "margin-top" "max-height"
-         "max-width" "min-height" "min-width" "opacity" "orphans" "outline" "overflow"
-         "overflow-wrap" "padding" "padding-bottom" "padding-left" "padding-right"
-         "padding-top" "page-break-after" "page-break-inside" "position" "pre-wrap"
-         "right" "tab-size" "table-layout" "text-align" "text-align" "text-align-last"
-         "text-combine-horizontal" "text-decoration" "text-decoration" "text-decoration-color"
-         "text-decoration-line" "text-decoration-style" "text-indent" "text-orientation"
-         "text-overflow" "text-rendering" "text-shadow" "text-transform" "text-underline-position"
-         "top" "top" "transform" "transform-origin" "transform-style" "transition"
-         "transition-delay" "transition-duration" "transition-property" "transition-timing-function"
-         "unicode-bidi" "vertical-align" "visibility" "white-space" "widows" "width"
-         "word-spacing" "word-wrap" "z-index" ))
+(setq
+ xah-css-property-names
+ '(
+"align-content"
+"align-items"
+"align-self"
+"animation"
+"animation-delay"
+"animation-direction"
+"animation-duration"
+"animation-fill-mode"
+"animation-iteration-count"
+"animation-name"
+"animation-play-state"
+"animation-timing-function"
+"anywhere"
+"attr"
+"backface-visibility"
+"background"
+"background-attachment"
+"background-clip"
+"background-color"
+"background-image"
+"background-origin"
+"background-position"
+"background-position-x"
+"background-position-y"
+"background-repeat"
+"background-size"
+"border"
+"border-bottom"
+"border-bottom-color"
+"border-bottom-left-radius"
+"border-bottom-right-radius"
+"border-bottom-style"
+"border-bottom-width"
+"border-collapse"
+"border-color"
+"border-image"
+"border-image-outset"
+"border-image-repeat"
+"border-image-slice"
+"border-image-source"
+"border-image-width"
+"border-left"
+"border-left-color"
+"border-left-style"
+"border-left-width"
+"border-radius"
+"border-right"
+"border-right-color"
+"border-right-style"
+"border-right-width"
+"border-spacing"
+"border-style"
+"border-top"
+"border-top-color"
+"border-top-left-radius"
+"border-top-right-radius"
+"border-top-style"
+"border-top-width"
+"border-width"
+"bottom"
+"bottom"
+"box-decoration-break"
+"box-shadow"
+"box-sizing"
+"break-after"
+"break-before"
+"break-inside"
+"clear"
+"color"
+"column-count"
+"content"
+"counter-increment"
+"counter-reset"
+"cursor"
+"direction"
+"display"
+"filter"
+"float"
+"font"
+"font-family"
+"font-size"
+"font-style"
+"font-weight"
+"height"
+"left"
+"letter-spacing"
+"line-height"
+"list-style"
+"list-style-image"
+"list-style-type"
+"margin"
+"margin-bottom"
+"margin-left"
+"margin-right"
+"margin-top"
+"max-height"
+"max-width"
+"min-height"
+"min-width"
+"opacity"
+"orphans"
+"outline"
+"overflow"
+"overflow-wrap"
+"padding"
+"padding-bottom"
+"padding-left"
+"padding-right"
+"padding-top"
+"page-break-after"
+"page-break-inside"
+"pointer-events"
+"position"
+"pre-wrap"
+"right"
+"tab-size"
+"table-layout"
+"text-align"
+"text-align"
+"text-align-last"
+"text-combine-horizontal"
+"text-decoration"
+"text-decoration"
+"text-decoration-color"
+"text-decoration-line"
+"text-decoration-style"
+"text-indent"
+"text-orientation"
+"text-overflow"
+"text-rendering"
+"text-shadow"
+"text-transform"
+"text-underline-position"
+"top"
+"top"
+"transform"
+"transform-origin"
+"transform-style"
+"transition"
+"transition-delay"
+"transition-duration"
+"transition-property"
+"transition-timing-function"
+"unicode-bidi"
+"vertical-align"
+"visibility"
+"white-space"
+"widows"
+"width"
+"word-spacing"
+"word-wrap"
+"z-index"
+
+   ))
 
 (defvar xah-css-pseudo-selector-names nil "List of CSS pseudo selector names.")
-(setq xah-css-pseudo-selector-names
-      '( ":active" ":after" ":any" ":before" ":checked" ":default" ":dir" ":disabled"
-         ":empty" ":enabled" ":first" ":first-child" ":first-letter" ":first-line"
-         ":first-of-type" ":focus" ":fullscreen" ":hover" ":in-range" ":indeterminate"
-         ":invalid" ":lang" ":last-child" ":last-of-type" ":left" ":link" ":not"
-         ":nth-child" ":nth-last-child" ":nth-last-of-type" ":nth-of-type" ":only-child"
-         ":only-of-type" ":optional" ":out-of-range" ":read-only" ":read-write"
-         ":required" ":right" ":root" ":scope" ":target" ":valid" ":visited" ))
+(setq
+ xah-css-pseudo-selector-names
+ '(
+":active"
+":after"
+":any"
+":before"
+":checked"
+":default"
+":dir"
+":disabled"
+":empty"
+":enabled"
+":first"
+":first-child"
+":first-letter"
+":first-line"
+":first-of-type"
+":focus"
+":fullscreen"
+":hover"
+":in-range"
+":indeterminate"
+":invalid"
+":lang"
+":last-child"
+":last-of-type"
+":left"
+":link"
+":not"
+":nth-child"
+":nth-last-child"
+":nth-last-of-type"
+":nth-of-type"
+":only-child"
+":only-of-type"
+":optional"
+":out-of-range"
+":read-only"
+":read-write"
+":required"
+":right"
+":root"
+":scope"
+":target"
+":valid"
+":visited"
+   ))
 
 (defvar xah-css-media-keywords nil "List of CSS media keywords.")
 (setq xah-css-media-keywords '( "@charset" "@document" "@font-face" "@import" "@keyframes" "@media" "@namespace" "@page" "@supports" "@viewport" "all" "and" "not" "only" "print" "screen" "speech" )) ; todo
@@ -310,63 +579,288 @@ Version 2021-08-03"
 (setq
  xah-css-value-kwds
  ;; "important" ; todo, this actually needs to be !important
- '( "absolute" "alpha" "at" "auto" "avoid" "blink" "block" "bold" "border-box"
-    "both" "bottom" "break-word" "calc" "capitalize" "center" "circle" "collapse"
-    "content-box" "dashed" "dotted" "double" "ellipse" "embed" "fixed" "flex"
-    "flex-start" "flex-wrap" "grid" "groove" "help" "hidden" "hsl" "hsla" "inherit"
-    "initial" "inline" "inline-block" "important" "inset" "italic" "justify" "large" "left"
-    "line-through" "linear-gradient" "lowercase" "ltr" "middle" "monospace"
-    "no-repeat" "none" "normal" "nowrap" "oblique" "outset" "overline" "pointer"
-    "radial-gradient" "relative" "repeat" "repeat-x" "repeat-y" "revert" "rgb"
-    "rgba" "ridge" "right" "rotate" "rotate3d" "rotateX" "rotateY" "rotateZ"
-    "rtl" "sans-serif" "scale" "scale3d" "scaleX" "scaleY" "scaleZ" "serif"
-    "skew" "skewX" "skewY" "small" "smaller" "solid" "square" "static" "steps"
-    "table" "table-caption" "table-cell" "table-column" "table-column-group"
-    "table-footer-group" "table-header-group" "table-row" "table-row-group"
-    "thick" "thin" "top" "translate" "translate3d" "translateX" "translateY"
-    "translateZ" "transparent" "underline" "unset" "uppercase" "url" "visible"
-    "wrap" "x-large" "xx-large" ))
+ '(
+"absolute"
+"alpha"
+"at"
+"auto"
+"avoid"
+"blink"
+"block"
+"bold"
+"border-box"
+"both"
+"bottom"
+"break-word"
+"calc"
+"capitalize"
+"center"
+"circle"
+"collapse"
+"content-box"
+"dashed"
+"dotted"
+"double"
+"ellipse"
+"embed"
+"fixed"
+"flex"
+"flex-start"
+"flex-wrap"
+"grid"
+"groove"
+"help"
+"hidden"
+"hsl"
+"hsla"
+"important"
+"inherit"
+"initial"
+"inline"
+"inline-block"
+"inset"
+"italic"
+"justify"
+"large"
+"left"
+"line-through"
+"linear-gradient"
+"lowercase"
+"ltr"
+"middle"
+"monospace"
+"no-repeat"
+"none"
+"normal"
+"nowrap"
+"oblique"
+"outset"
+"overline"
+"pointer"
+"radial-gradient"
+"relative"
+"repeat"
+"repeat-x"
+"repeat-y"
+"revert"
+"rgb"
+"rgba"
+"ridge"
+"right"
+"rotate"
+"rotate3d"
+"rotateX"
+"rotateY"
+"rotateZ"
+"rtl"
+"sans-serif"
+"scale"
+"scale3d"
+"scaleX"
+"scaleY"
+"scaleZ"
+"serif"
+"skew"
+"skewX"
+"skewY"
+"small"
+"smaller"
+"solid"
+"square"
+"static"
+"steps"
+"table"
+"table-caption"
+"table-cell"
+"table-column"
+"table-column-group"
+"table-footer-group"
+"table-header-group"
+"table-row"
+"table-row-group"
+"thick"
+"thin"
+"top"
+"translate"
+"translate3d"
+"translateX"
+"translateY"
+"translateZ"
+"transparent"
+"underline"
+"unset"
+"uppercase"
+"url"
+"visible"
+"wrap"
+"x-large"
+"xx-large"
+))
 
 (defvar xah-css-color-names nil "List of CSS color names.")
 (setq xah-css-color-names
-      '("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige"
-        "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown"
-        "burlywood" "cadetblue" "chartreuse" "chocolate" "coral"
-        "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan"
-        "darkgoldenrod" "darkgray" "darkgreen" "darkgrey" "darkkhaki"
-        "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred"
-        "darksalmon" "darkseagreen" "darkslateblue" "darkslategray"
-        "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue"
-        "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite"
-        "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod"
-        "gray" "green" "greenyellow" "grey" "honeydew" "hotpink" "indianred"
-        "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen"
-        "lemonchiffon" "lightblue" "lightcoral" "lightcyan"
-        "lightgoldenrodyellow" "lightgray" "lightgreen" "lightgrey"
-        "lightpink" "lightsalmon" "lightseagreen" "lightskyblue"
-        "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow"
-        "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine"
-        "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen"
-        "mediumslateblue" "mediumspringgreen" "mediumturquoise"
-        "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin"
-        "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange"
-        "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise"
-        "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum"
-        "powderblue" "purple" "red" "rosybrown" "royalblue" "saddlebrown"
-        "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver"
-        "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen"
-        "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet"
-        "wheat" "white" "whitesmoke" "yellow" "yellowgreen"))
+'(
+"aliceblue"
+"antiquewhite"
+"aqua"
+"aquamarine"
+"azure"
+"beige"
+"bisque"
+"black"
+"blanchedalmond"
+"blue"
+"blueviolet"
+"brown"
+"burlywood"
+"cadetblue"
+"chartreuse"
+"chocolate"
+"coral"
+"cornflowerblue"
+"cornsilk"
+"crimson"
+"cyan"
+"darkblue"
+"darkcyan"
+"darkgoldenrod"
+"darkgray"
+"darkgreen"
+"darkgrey"
+"darkkhaki"
+"darkmagenta"
+"darkolivegreen"
+"darkorange"
+"darkorchid"
+"darkred"
+"darksalmon"
+"darkseagreen"
+"darkslateblue"
+"darkslategray"
+"darkslategrey"
+"darkturquoise"
+"darkviolet"
+"deeppink"
+"deepskyblue"
+"dimgray"
+"dimgrey"
+"dodgerblue"
+"firebrick"
+"floralwhite"
+"forestgreen"
+"fuchsia"
+"gainsboro"
+"ghostwhite"
+"gold"
+"goldenrod"
+"gray"
+"green"
+"greenyellow"
+"grey"
+"honeydew"
+"hotpink"
+"indianred"
+"indigo"
+"ivory"
+"khaki"
+"lavender"
+"lavenderblush"
+"lawngreen"
+"lemonchiffon"
+"lightblue"
+"lightcoral"
+"lightcyan"
+"lightgoldenrodyellow"
+"lightgray"
+"lightgreen"
+"lightgrey"
+"lightpink"
+"lightsalmon"
+"lightseagreen"
+"lightskyblue"
+"lightslategray"
+"lightslategrey"
+"lightsteelblue"
+"lightyellow"
+"lime"
+"limegreen"
+"linen"
+"magenta"
+"maroon"
+"mediumaquamarine"
+"mediumblue"
+"mediumorchid"
+"mediumpurple"
+"mediumseagreen"
+"mediumslateblue"
+"mediumspringgreen"
+"mediumturquoise"
+"mediumvioletred"
+"midnightblue"
+"mintcream"
+"mistyrose"
+"moccasin"
+"navajowhite"
+"navy"
+"oldlace"
+"olive"
+"olivedrab"
+"orange"
+"orangered"
+"orchid"
+"palegoldenrod"
+"palegreen"
+"paleturquoise"
+"palevioletred"
+"papayawhip"
+"peachpuff"
+"peru"
+"pink"
+"plum"
+"powderblue"
+"purple"
+"red"
+"rosybrown"
+"royalblue"
+"saddlebrown"
+"salmon"
+"sandybrown"
+"seagreen"
+"seashell"
+"sienna"
+"silver"
+"skyblue"
+"slateblue"
+"slategray"
+"slategrey"
+"snow"
+"springgreen"
+"steelblue"
+"tan"
+"teal"
+"thistle"
+"tomato"
+"turquoise"
+"violet"
+"wheat"
+"white"
+"whitesmoke"
+"yellow"
+"yellowgreen"
+))
 
 (defvar xah-css-all-keywords nil "List of all CSS keywords")
-(setq xah-css-all-keywords (append xah-css-html-tag-names
-                                     xah-css-color-names
-                                     xah-css-property-names
-                                     xah-css-pseudo-selector-names
-                                     xah-css-media-keywords
-                                     xah-css-unit-names
-                                     xah-css-value-kwds
-                                     ))
+(setq
+ xah-css-all-keywords
+ (append
+  xah-css-html-tag-names
+  xah-css-color-names
+  xah-css-property-names
+  xah-css-pseudo-selector-names
+  xah-css-media-keywords
+  xah-css-unit-names
+  xah-css-value-kwds
+  ))
 
 ;; HHH___________________________________________________________________
 ;; completion
@@ -375,18 +869,17 @@ Version 2021-08-03"
   "Perform keyword completion on current word.
 This uses `ido-mode' user interface for completion."
   (interactive)
-  (let* (
-         ($bds (bounds-of-thing-at-point 'symbol))
+  (let* (($bds (bounds-of-thing-at-point 'symbol))
          ($p1 (car $bds))
          ($p2 (cdr $bds))
          ($current-sym
-          (if  (or (null $p1) (null $p2) (equal $p1 $p2))
+          (if (or (null $p1) (null $p2) (equal $p1 $p2))
               ""
             (buffer-substring-no-properties $p1 $p2)))
          $result-sym)
     (when (not $current-sym) (setq $current-sym ""))
     (setq $result-sym
-          (ido-completing-read "" xah-css-all-keywords nil nil $current-sym ))
+          (ido-completing-read "" xah-css-all-keywords nil nil $current-sym))
     (delete-region $p1 $p2)
     (insert $result-sym)))
 
@@ -419,66 +912,59 @@ This uses `ido-mode' user interface for completion."
 ;; syntax coloring related
 
 (setq xah-css-font-lock-keywords
-      (let ( )
-        `(
-          ("#[-_a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-id-selector)
-          ("\\.[a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-class-selector)
-          (,(regexp-opt xah-css-pseudo-selector-names )
-           . font-lock-preprocessor-face)
-          (,(regexp-opt xah-css-html-tag-names 'symbols)
-           . font-lock-function-name-face)
-          (,(regexp-opt xah-css-property-names 'symbols )
-           . font-lock-variable-name-face )
-          (,(regexp-opt xah-css-value-kwds 'symbols)
-           . font-lock-keyword-face)
-          (,(regexp-opt xah-css-color-names 'symbols)
-           . font-lock-constant-face)
-          (,(format "[0-9]+\\(%s\\)" (regexp-opt xah-css-unit-names ))
-           . (1 font-lock-type-face))
-          (,(regexp-opt xah-css-media-keywords ) . font-lock-builtin-face)
+      `(("#[-_a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-id-selector)
+        ("\\.[a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-class-selector)
+        (,(regexp-opt xah-css-pseudo-selector-names)
+         . font-lock-preprocessor-face)
+        (,(regexp-opt xah-css-html-tag-names 'symbols)
+         . font-lock-function-name-face)
+        (,(regexp-opt xah-css-property-names 'symbols)
+         . font-lock-variable-name-face)
+        (,(regexp-opt xah-css-value-kwds 'symbols)
+         . font-lock-keyword-face)
+        (,(regexp-opt xah-css-color-names 'symbols)
+         . font-lock-constant-face)
+        (,(format "[0-9]+\\(%s\\)" (regexp-opt xah-css-unit-names))
+         . (1 font-lock-type-face))
+        (,(regexp-opt xah-css-media-keywords) . font-lock-builtin-face)
+        ("--[A-Za-z][A-Za-z0-9]+" . font-lock-warning-face)
+        ("#[[:xdigit:]]\\{6,6\\}" .
+         (0 (put-text-property
+             (match-beginning 0)
+             (match-end 0)
+             'face (list :background (match-string-no-properties 0)))))
+        ("#[[:xdigit:]]\\{3,3\\};" .
+         (0 (put-text-property
+             (match-beginning 0)
+             (match-end 0)
+             'face
+             (list
+              :background
+              (let* ((ms (match-string-no-properties 0))
+                     (r (substring ms 1 2))
+                     (g (substring ms 2 3))
+                     (b (substring ms 3 4)))
+                (concat "#" r r g g b b))))))
+        ("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
+         (0 (put-text-property
+             (+ (match-beginning 0) 3)
+             (match-end 0)
+             'face
+             (list
+              :background
+              (concat "#"
+                      (mapconcat
+                       'identity
+                       (mapcar
+                        (lambda (x) (format "%02x" (round (* x 255))))
+                        (color-hsl-to-rgb
+                         (/ (string-to-number (match-string-no-properties 1)) 360.0)
+                         (/ (string-to-number (match-string-no-properties 2)) 100.0)
+                         (/ (string-to-number (match-string-no-properties 3)) 100.0)))
+                       "")) ; "#00aa00"
+              ))))
 
-          ("--[A-Za-z][A-Za-z0-9]+" . font-lock-warning-face)
-
-          ("#[[:xdigit:]]\\{6,6\\}" .
-           (0 (put-text-property
-               (match-beginning 0)
-               (match-end 0)
-               'face (list :background (match-string-no-properties 0)))))
-
-          ("#[[:xdigit:]]\\{3,3\\};" .
-           (0 (put-text-property
-               (match-beginning 0)
-               (match-end 0)
-               'face
-               (list
-                :background
-                (let* (
-                       (ms (match-string-no-properties 0))
-                       (r (substring ms 1 2))
-                       (g (substring ms 2 3))
-                       (b (substring ms 3 4)))
-                  (concat "#" r r g g b b))))))
-
-          ("hsl( *\\([0-9]\\{1,3\\}\\) *, *\\([0-9]\\{1,3\\}\\)% *, *\\([0-9]\\{1,3\\}\\)% *)" .
-           (0 (put-text-property
-               (+ (match-beginning 0) 3)
-               (match-end 0)
-               'face
-               (list
-                :background
-                (concat "#"
-                        (mapconcat
-                         'identity
-                         (mapcar
-                          (lambda (x) (format "%02x" (round (* x 255))))
-                          (color-hsl-to-rgb
-                           (/ (string-to-number (match-string-no-properties 1)) 360.0)
-                           (/ (string-to-number (match-string-no-properties 2)) 100.0)
-                           (/ (string-to-number (match-string-no-properties 3)) 100.0)))
-                         "" )) ;  "#00aa00"
-                ))))
-
-          ("'[^']+'" . font-lock-string-face))))
+        ("'[^']+'" . font-lock-string-face)))
 
 ;; HHH___________________________________________________________________
 ;; indent/reformat related
@@ -494,11 +980,10 @@ If char before point is letters and char after point is whitespace or punctuatio
   ;; space▮char → do indent
   ;; char▮space → do completion
   ;; char ▮char → do indent
-  (let ( ($syntaxState (syntax-ppss)))
+  (let (($syntaxState (syntax-ppss)))
     (if (or (nth 3 $syntaxState) (nth 4 $syntaxState))
         (xah-css-prettify-root-sexp)
-      (if
-          (and (looking-back "[-_a-zA-Z]" 1)
+      (if (and (looking-back "[-_a-zA-Z]" 1)
                (or (eobp) (looking-at "[\n[:blank:][:punct:]]")))
           (xah-css-complete-symbol)
         (xah-css-prettify-root-sexp)))))
@@ -527,18 +1012,13 @@ Root sexp group is the outmost sexp unit."
 Returns true if point is moved, else false."
   (interactive)
   (let (($i 0)
-        ($p0 (if (number-or-marker-p pos)
-                 pos
-               (point))))
+        ($p0 (if (number-or-marker-p pos) pos (point))))
     (goto-char $p0)
     (while
         (and (< (setq $i (1+ $i)) 20)
              (not (eq (nth 0 (syntax-ppss (point))) 0)))
       (xah-css-up-list -1 "ESCAPE-STRINGS" "NO-SYNTAX-CROSSING"))
-    (if (equal $p0 (point))
-        nil
-      t
-      )))
+    (if (equal $p0 (point)) nil t)))
 
 (defun xah-css-up-list (arg1 &optional arg2 arg3)
   "Backward compatibility fix for emacs 24.4's `up-list'.
@@ -555,7 +1035,6 @@ emacs 25.x changed `up-list' to take up to 3 args. Before, only 1."
   "Return t if not in string or comment. Else nil.
 This is for abbrev table property `:enable-function'.
 Version 2016-10-24"
-
   ;; (let (($syntaxState (syntax-ppss)))
   ;;     (not (or (nth 3 $syntaxState) (nth 4 $syntaxState))))
   t
@@ -568,11 +1047,7 @@ Returns the abbrev symbol if there's a expansion, else nil.
 Version 2016-10-24"
   (interactive)
   (when (xah-css-abbrev-enable-function) ; abbrev property :enable-function doesn't seem to work, so check here instead
-    (let (
-          $p1 $p2
-          $abrStr
-          $abrSymbol
-          )
+    (let ($p1 $p2 $abrStr $abrSymbol)
       (save-excursion
         (forward-symbol -1)
         (setq $p1 (point))
@@ -582,7 +1057,7 @@ Version 2016-10-24"
       (setq $abrSymbol (abbrev-symbol $abrStr))
       (if $abrSymbol
           (progn
-            (abbrev-insert $abrSymbol $abrStr $p1 $p2 )
+            (abbrev-insert $abrSymbol $abrStr $p1 $p2)
             (xah-css--abbrev-position-cursor $p1)
             $abrSymbol)
         nil))))
@@ -592,8 +1067,8 @@ Version 2016-10-24"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (let (($foundQ (search-backward "▮" (if Pos Pos (max (point-min) (- (point) 100))) t )))
-    (when $foundQ (forward-char ))
+  (let (($foundQ (search-backward "▮" (if Pos Pos (max (point-min) (- (point) 100))) t)))
+    (when $foundQ (forward-char))
     $foundQ
     ))
 
@@ -607,9 +1082,7 @@ Version 2016-10-24"
 (put 'xah-css--ahf 'no-self-insert t)
 
 (define-abbrev-table 'xah-css-mode-abbrev-table
-  '(
-
-    ("b" "border" xah-css--ahf)
+  '(("b" "border" xah-css--ahf)
     ("bb" "border-bottom" xah-css--ahf)
     ("bbc" "border-bottom-color" xah-css--ahf)
     ("bbs" "border-bottom-style" xah-css--ahf)
