@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.6.20210911062050
+;; Version: 3.6.20210925094217
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -159,7 +159,7 @@ Version 2020-12-23 2021-08-03 2021-09-05"
   (let ($p1 $p2)
     (if Begin
         (setq $p1 Begin $p2 End)
-      (if (use-region-p)
+      (if (region-active-p)
           (setq $p1 (region-beginning) $p2 (region-end))
         (when (search-backward "{")
           (setq $p1 (point))
@@ -867,21 +867,22 @@ Version 2021-08-03"
 
 (defun xah-css-complete-symbol ()
   "Perform keyword completion on current word.
-This uses `ido-mode' user interface for completion."
+This uses `ido-mode' user interface for completion.
+Version 2021-09-13"
   (interactive)
   (let* (($bds (bounds-of-thing-at-point 'symbol))
          ($p1 (car $bds))
          ($p2 (cdr $bds))
-         ($current-sym
+         ($thisSym
           (if (or (null $p1) (null $p2) (equal $p1 $p2))
               ""
             (buffer-substring-no-properties $p1 $p2)))
-         $result-sym)
-    (when (not $current-sym) (setq $current-sym ""))
-    (setq $result-sym
-          (ido-completing-read "" xah-css-all-keywords nil nil $current-sym))
+         $resultSym)
+    (when (not $thisSym) (setq $thisSym ""))
+    (setq $resultSym
+          (ido-completing-read "" xah-css-all-keywords nil nil $thisSym))
     (delete-region $p1 $p2)
-    (insert $result-sym)))
+    (insert $resultSym)))
 
 ;; HHH___________________________________________________________________
 ;; syntax table
