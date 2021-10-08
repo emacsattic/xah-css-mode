@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021 by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 3.6.20210925094217
+;; Version: 3.6.20211008000351
 ;; Created: 18 April 2013
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages, convenience, css, color
@@ -915,20 +915,14 @@ Version 2021-09-13"
 (setq xah-css-font-lock-keywords
       `(("#[-_a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-id-selector)
         ("\\.[a-zA-Z]+[-_a-zA-Z0-9]*" . 'xah-css-class-selector)
-        (,(regexp-opt xah-css-pseudo-selector-names)
-         . font-lock-preprocessor-face)
-        (,(regexp-opt xah-css-html-tag-names 'symbols)
-         . font-lock-function-name-face)
-        (,(regexp-opt xah-css-property-names 'symbols)
-         . font-lock-variable-name-face)
-        (,(regexp-opt xah-css-value-kwds 'symbols)
-         . font-lock-keyword-face)
-        (,(regexp-opt xah-css-color-names 'symbols)
-         . font-lock-constant-face)
-        (,(format "[0-9]+\\(%s\\)" (regexp-opt xah-css-unit-names))
-         . (1 font-lock-type-face))
-        (,(regexp-opt xah-css-media-keywords) . font-lock-builtin-face)
-        ("--[A-Za-z][A-Za-z0-9]+" . font-lock-warning-face)
+        (,(regexp-opt xah-css-pseudo-selector-names) . 'font-lock-preprocessor-face)
+        (,(regexp-opt xah-css-html-tag-names 'symbols) . 'font-lock-function-name-face)
+        (,(regexp-opt xah-css-property-names 'symbols) . 'font-lock-variable-name-face)
+        (,(regexp-opt xah-css-value-kwds 'symbols) . 'font-lock-keyword-face)
+        (,(regexp-opt xah-css-color-names 'symbols) . 'font-lock-constant-face)
+        (,(format "[0-9]+\\(%s\\)" (regexp-opt xah-css-unit-names)) . (1 'font-lock-type-face))
+        (,(regexp-opt xah-css-media-keywords) . 'font-lock-builtin-face)
+        ("--[A-Za-z][A-Za-z0-9]+" . 'font-lock-warning-face)
         ("#[[:xdigit:]]\\{6,6\\}" .
          (0 (put-text-property
              (match-beginning 0)
@@ -965,7 +959,7 @@ Version 2021-09-13"
                        "")) ; "#00aa00"
               ))))
 
-        ("'[^']+'" . font-lock-string-face)))
+        ("'[^']+'" . 'font-lock-string-face)))
 
 ;; HHH___________________________________________________________________
 ;; indent/reformat related
@@ -1256,7 +1250,7 @@ Version 2016-10-24"
   (define-key xah-css-leader-map (kbd "c") 'xah-css-format-compact)
   (define-key xah-css-leader-map (kbd "g") 'xah-css-format-compact-buffer)
   (define-key xah-css-leader-map (kbd "t") 'xah-css-format-expand)
-  (define-key xah-css-leader-map (kbd "h") 'xah-css-format-expand-buffer)
+  (define-key xah-css-leader-map (kbd "f") 'xah-css-format-expand-buffer)
   (define-key xah-css-leader-map (kbd "u") 'xah-css-complete-symbol))
 
 ;; HHH___________________________________________________________________
